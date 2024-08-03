@@ -36,3 +36,4 @@ def filter_by_label(label: str, dataframe: pd.DataFrame, col_name: str = "label"
 	# copy df
 	df = dataframe.copy(deep=True)
 	return df[df[col_name] == label]
+
