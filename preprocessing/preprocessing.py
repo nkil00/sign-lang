@@ -85,8 +85,8 @@ def create_data_sets(label_dir: os.path, img_dir: os.path, train_size:float=0.8,
 
 
 
-def create_data_loaders(batch_size=32, train_size=0.8, label_dir: os.path = None, img_dir: os.path = None):
-    train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size)
+def create_data_loaders(batch_size=32, train_size=0.8, label_dir: os.path = None, img_dir: os.path = None, augment_data:bool = True):
+    train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size, augment_data=augment_data)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True)
