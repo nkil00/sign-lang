@@ -21,6 +21,7 @@ TRAIN_SIZE = .8
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EPOCHS = 10
+DATA_AUGMENTATION = True
 
 # get mapping dicts
 
@@ -79,8 +80,8 @@ def conv_idx_prediction_to_class(batch_predictions: np.ndarray, idx_class_dict: 
 
 ### read in hyper_params
 args_list = sys.argv[1:]
-opts = "t:b:e:l:"
-lopts = ["train_size=", "batch_size=", "epochs=", "learning_rate="]
+opts = "t:b:e:l:d:"
+lopts = ["train_size=", "batch_size=", "epochs=", "learning_rate=", "data_augmentation="]
 
 try:
     args, vals = getopt.getopt(args_list, opts, lopts)
@@ -94,6 +95,12 @@ try:
             EPOCHS = int(cv)
         if ca in ("-b", "--batch_size"):
             BATCH_SIZE = int(cv)
+        if ca in ("-d", "--data_augmentation"):
+            if cv == 1:
+                DATA_AUGMENTATION = True
+            else:
+                DATA_AUGMENTATION = False
+
 
 except getopt.error as e:
     print(e)
@@ -109,7 +116,7 @@ print("> TRAIN SIZE:", TRAIN_SIZE)
 print("=" * 100)
 
 # get test and data loader
-train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR)
+train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR, augment_data=data_augmentation)
 
 print("Size Train-Set:", len(train_loader.dataset))
 print("Size Test-Set:", len(test_loader.dataset))
