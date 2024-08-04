@@ -29,7 +29,7 @@ class_index = {label:idx for idx, label in enumerate(unique_labels)}
 index_class = {idx:label for idx, label in enumerate(unique_labels)}
 
 ### function definitions
-def conv_idx_prediction_to_class(predictions: numpy.ndarray, idx_label_dict: dict):
+def conv_idx_prediction_to_class(predictions: np.ndarray, idx_label_dict: dict):
     """
     
     :param batch_predictions:  of which the _rows_ are the probabilities of a sample to belong to the specific class (at idx), _cols_ are samples (should be BATCH_SIZE columns)
@@ -37,9 +37,9 @@ def conv_idx_prediction_to_class(predictions: numpy.ndarray, idx_label_dict: dic
     :return: a list of length BATCH_SIZE 
     """
     class_predictions = []
-    for smp_predictions in batch_predictions:
+    for smp_predictions in batches_predictions:
         final_prediction_num = np.argmax(smp_predictions)
-        final_prediction = idx_class_dict[final_prediction_num]
+        final_prediction = idx_label_dict[final_prediction_num]
         class_predictions.append(final_prediction)
         
     return class_predictions
@@ -191,4 +191,5 @@ for bp, bl in zip(batches_predictions, batches_labels):
     total_test_samples += 1
 
 accuracy = (correct_test_samples / total_test_samples)
+
 print(f"> The total accuracy of the model is: {accuracy:.2f}.\n")
