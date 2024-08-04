@@ -10,9 +10,12 @@ from preprocessing.preprocessing import get_unique_labels
 
 import getopt
 import sys
+import os
 
 from tqdm import tqdm
 
+IMG_DIR = os.path.join(".", "data", "sign_lang_train")
+LABEL_DIR = os.path.join(IMG_DIR, "labels.csv")
 
 TRAIN_SIZE = .8
 BATCH_SIZE = 32
@@ -20,7 +23,8 @@ LEARNING_RATE = 0.001
 EPOCHS = 10
 
 # get mapping dicts
-unique_labels = get_unique_labels()
+
+unique_labels = get_unique_labels(file_path = LABEL_DIR)
 class_index = {label:idx for idx, label in enumerate(unique_labels)}
 index_class = {idx:label for idx, label in enumerate(unique_labels)}
 
@@ -91,7 +95,7 @@ print("> TRAIN SIZE:", TRAIN_SIZE)
 print("=" * 100)
 
 # get test and data loader
-train_loader, test_loader  = preprocessing.create_data_loaders()
+train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR)
 
 print("Size Train-Set:", len(train_loader.dataset))
 print("Size Test-Set:", len(test_loader.dataset))
