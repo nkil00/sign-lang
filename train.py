@@ -14,6 +14,7 @@ import os
 
 from tqdm import tqdm
 
+MODEL_DIR = os.path.join(".", "models")
 IMG_DIR = os.path.join(".", "data", "sign_lang_train")
 LABEL_DIR = os.path.join(IMG_DIR, "labels.csv")
 
@@ -200,3 +201,12 @@ for bp, bl in zip(batches_predictions, batches_labels):
 accuracy = (correct_test_samples / total_test_samples)
 
 print(f"> The total accuracy of the model is: {accuracy:.2f}.\n")
+
+
+### save model parameters
+model_name = f"model-{total_test_losses[-1]:.3f}"
+MODEL_DIR = os.path.join(MODEL_DIR, model_name)
+torch.save(model_0.state_dict(), MODEL_DIR)
+print("=" * 100, f"\nSaved model: {model_name}")
+
+
