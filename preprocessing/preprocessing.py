@@ -15,9 +15,9 @@ LABEL_DIR = os.path.join(IMAGE_DIR, "labels.csv")
 
 IMG_HEIGHT = 128
 
-def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str = LABEL_DIR):
+def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str = None):
     if df is None:
-        df = pd.read_csv(LABEL_DIR)
+        df = pd.read_csv(file_path)
     cls = df[col_name].unique()
 
     return cls
@@ -32,7 +32,7 @@ def data_distribution(df: pd.DataFrame) -> dict:
     
     return cls_cups
 
-def augment_data(df: pd.DataFrame, train_cls_indiv: dict, threshold: int=300) -> SignLanguageDataset:
+def augment_data(df: pd.DataFrame, train_cls_indiv: dict, threshold: int=300, img_dir: os.path = None) -> SignLanguageDataset:
     # 
     cls_uq = get_unique_labels(df)
     cls_cups = data_distribution(df)
@@ -48,12 +48,12 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, threshold: int=300) ->
     for c in cls_to_augment.keys():
         aug_ds = SignLanguageDataset(annotations=cls_to_augment[c],
                                      transform=aug_transform,
-                                     img_dir=IMAGE_DIR)
+                                     img_dir=img_dir)
         aug_datasets.append(aug_ds)
     
     naug_ds = SignLanguageDataset(annotations=df,
                                   transform=def_transform,
-                                  img_dir=IMAGE_DIR)
+                                  img_dir=img_dir)
 
     conc_ds = aug_datasets + [naug_ds]
 
@@ -61,7 +61,7 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, threshold: int=300) ->
 
     return train_dataset
 
-def create_data_sets(label_dir: str, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True):
+def create_data_sets(label_dir: os.path, img_dir: os.path, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True):
     img_label_df = pd.read_csv(label_dir)
     unique_labels = get_unique_labels(img_label_df)
 
@@ -74,19 +74,19 @@ def create_data_sets(label_dir: str, train_size:float=0.8, label_col_name:str="l
 
     def_transform = default_transform(IMG_HEIGHT, IMG_HEIGHT)
     if augment:
-        train_dataset = augment_data(df=train_labels, train_cls_indiv=train_labels_indiv)
+        train_dataset = augment_data(df=train_labels, train_cls_indiv=train_labels_indiv, img_dir=img_dir)
     else:
-        train_dataset = SignLanguageDataset(train_labels, transform=def_transform, img_dir=IMAGE_DIR)
+        train_dataset = SignLanguageDataset(train_labels, transform=def_transform, img_dir=img_dir)
     
-    test_dataset = SignLanguageDataset(test_labels, transform=def_transform, img_dir=IMAGE_DIR)
+    test_dataset = SignLanguageDataset(test_labels, transform=def_transform, img_dir=img_dir)
 
     return train_dataset, test_dataset
 
 
 
 
-def create_data_loaders(batch_size=32, train_size=0.8, label_dir=LABEL_DIR):
-    train_ds, test_ds = create_data_sets(label_dir, train_size=train_size)
+def create_data_loaders(batch_size=32, train_size=0.8, label_dir: os.path = None, img_dir: os.path = None):
+    train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True)
@@ -95,14 +95,7 @@ def create_data_loaders(batch_size=32, train_size=0.8, label_dir=LABEL_DIR):
 
 def main():
     # get label info
-    print("Collecting label information from: <", LABEL_DIR, ">", sep="")
-    train_l, test_l = create_data_loaders()
-
-    t_iter = iter(train_l)
-    t_s = next(t_iter)
-    label, img = t_s
-    print(img.shape)
-
+    print("Preprocessing...")
 
 
 if __name__ == "__main__":
