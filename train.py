@@ -29,6 +29,20 @@ class_index = {label:idx for idx, label in enumerate(unique_labels)}
 index_class = {idx:label for idx, label in enumerate(unique_labels)}
 
 ### function definitions
+def conv_idx_prediction_to_class(predictions: numpy.ndarray, idx_label_dict: dict):
+    """
+    
+    :param batch_predictions:  of which the _rows_ are the probabilities of a sample to belong to the specific class (at idx), _cols_ are samples (should be BATCH_SIZE columns)
+    :param idx_class_dict: dictionary where a numerical value is mapped to its class, e.g. {0: "l", 1: "a", ...}
+    :return: a list of length BATCH_SIZE 
+    """
+    class_predictions = []
+    for smp_predictions in batch_predictions:
+        final_prediction_num = np.argmax(smp_predictions)
+        final_prediction = idx_class_dict[final_prediction_num]
+        class_predictions.append(final_prediction)
+        
+    return class_predictions
 
 def label_to_int_index(label: str, class_index_dict: dict):
     return class_index[label]
@@ -147,3 +161,34 @@ for epoch in range(EPOCHS):
     print(f"Epoch {epoch} done. | Loss = {epoch_loss_test}")
 
 print(f"Training done. Final loss: {total_test_losses[-1]}")
+
+
+# evaluate the models perfmance
+print("=" * 100, "\nEvaluating the model...")
+
+model_0.eval()
+
+batches_predictions = []
+batches_labels = []
+
+# get predictions
+with torch.no_grad():
+    for img, label in test_loader:
+        batch_preds = model_0(img).numpy()
+        batch_preds = conv_idx_prediction_to_class(batch_preds, index_class)
+        batches_predictions.append(batch_preds)
+        batches_labels.append(list(label))
+
+# evaluate predictions
+batches_predictions = [x for sub in batches_predictions for x in sub]
+batches_labels = [x for sub in batches_labels for x in sub]
+
+correct_test_samples = 0
+total_test_samples = 0
+for bp, bl in zip(batches_predictions, batches_labels):
+    if bp == bl:
+        correct_test_samples += 1
+    total_test_samples += 1
+
+accuracy = (correct_test_samples / total_test_samples)
+print(f"> The total accuracy of the model is: {accuracy:.2f}.\n")
