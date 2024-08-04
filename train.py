@@ -117,7 +117,7 @@ print("> TRAIN SIZE:", TRAIN_SIZE)
 print("=" * 100)
 
 # get test and data loader
-train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR, augment_data=data_augmentation)
+train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR, augment_data=DATA_AUGMENTATION)
 
 print("Size Train-Set:", len(train_loader.dataset))
 print("Size Test-Set:", len(test_loader.dataset))
@@ -181,7 +181,7 @@ batches_labels = []
 
 # get predictions
 with torch.no_grad():
-    for img, label in test_loader:
+    for img, label in tqdm(test_loader):
         batch_preds = model_0(img).numpy()
         batch_preds = conv_idx_prediction_to_class(batch_preds, index_class)
         batches_predictions.append(batch_preds)
@@ -205,7 +205,7 @@ print(f"> The total accuracy of the model is: {accuracy:.2f}.\n")
 
 ### save model parameters
 model_name = f"model-{total_test_losses[-1]:.3f}"
-MODEL_DIR = os.path.join(MODEL_DIR, model_name)
+MODEL_DIR = os.path.join(MODEL_DIR, "state_dicts", f"{model_name}.pth")
 torch.save(model_0.state_dict(), MODEL_DIR)
 print("=" * 100, f"\nSaved model: {model_name}")
 
