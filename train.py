@@ -97,7 +97,7 @@ try:
         if ca in ("-b", "--batch_size"):
             BATCH_SIZE = int(cv)
         if ca in ("-d", "--data_augmentation"):
-            if cv == 1:
+            if int(cv) == 1:
                 DATA_AUGMENTATION = True
             else:
                 DATA_AUGMENTATION = False
