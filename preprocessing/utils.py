@@ -1,4 +1,7 @@
+from datetime import datetime 
+
 import pandas as pd
+
 import torch
 from torchvision.transforms import v2
 from torchvision import transforms
@@ -37,3 +40,17 @@ def filter_by_label(label: str, dataframe: pd.DataFrame, col_name: str = "label"
 	df = dataframe.copy(deep=True)
 	return df[df[col_name] == label]
 
+def generate_info(epochs, batch_size, train_size, test_size, lr, model, binds=80) -> str:
+    sep = "-"*binds
+    date = "# <Date>\n\n"
+    ep  = f"- Epochs: {epochs}\n"
+    bs = f"- Batch Size: {batch_size}\n"
+    trs = f"- Trainset Size: {train_size}\n"
+    tes = f"- Testset Size: {test_size}\n"
+    lr = f"- Learning Rate: {lr}\n"
+    modelstr = f"model: ```\n{model}\n```\n"
+    
+    info_str = date + sep + ep + lr + bs + trs + tes + lr + sep + modelstr 
+
+    return info_str
+    
