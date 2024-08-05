@@ -5,8 +5,10 @@ import torch.nn.functional as F
 import numpy as np
 
 from models.cnn_models import ConvSignLangNN
+from models.cnn_models import ConvSignLangNN_6
 from preprocessing import preprocessing
 from preprocessing.preprocessing import get_unique_labels
+from preprocessing.utils import generate_info
 
 import getopt
 import sys
@@ -119,19 +121,18 @@ print("=" * 100)
 # get test and data loader
 train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR, augment_data=DATA_AUGMENTATION)
 
-print("Size Train-Set:", len(train_loader.dataset))
-print("Size Test-Set:", len(test_loader.dataset))
-
-print("=" * 100)
-
+train_size = len(train_loader.dataset)
+test_size = len(test_loader.dataset)
 
 ### model initialization
-model_0 = ConvSignLangNN()
+model_0 = ConvSignLangNN_6()
 optim = torch.optim.Adam(params=model_0.parameters(), lr = LEARNING_RATE)
 loss_fn_0 = torch.nn.CrossEntropyLoss()
 
-print("Model:\n", model_0)
-print("=" * 100)
+info_str = generate_info(EPOCHS, BATCH_SIZE, train_size, test_size, LEARNING_RATE, model_0)
+
+print(info_str)
+
 print("Starting training...")
 
 ### start training
