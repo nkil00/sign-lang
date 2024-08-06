@@ -41,7 +41,7 @@ def filter_by_label(label: str, dataframe: pd.DataFrame, col_name: str = "label"
 	return df[df[col_name] == label]
 
 def generate_info(epochs, batch_size, train_size, test_size, lr, model, binds=80) -> str:
-    sep = "-"*binds
+    sep = "-"*binds + "\n"
     date = "# <Date>\n\n"
     ep  = f"- Epochs: {epochs}\n"
     bs = f"- Batch Size: {batch_size}\n"
@@ -50,7 +50,7 @@ def generate_info(epochs, batch_size, train_size, test_size, lr, model, binds=80
     lr = f"- Learning Rate: {lr}\n"
     modelstr = f"model: ```\n{model}\n```\n"
     
-    info_str = date + sep + ep + lr + bs + trs + tes + lr + sep + modelstr 
+    info_str = date + sep + ep + lr + bs + trs + tes + lr + sep + modelstr + sep
 
     return info_str
     

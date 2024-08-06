@@ -109,15 +109,6 @@ except getopt.error as e:
     print(e)
     exit()
 
-print("=" * 100)
-print("Hyperparamters:")
-print("> EPOCHS:", EPOCHS)
-print("> BATCH_SIZE:", BATCH_SIZE)
-print("> LEARNING RATE:", LEARNING_RATE)
-print("> TRAIN SIZE:", TRAIN_SIZE)
-
-print("=" * 100)
-
 # get test and data loader
 train_loader, test_loader  = preprocessing.create_data_loaders(label_dir=LABEL_DIR, img_dir=IMG_DIR, augment_data=DATA_AUGMENTATION)
 
@@ -173,7 +164,7 @@ print(f"Training done. Final loss: {total_test_losses[-1]}")
 
 
 # evaluate the models perfmance
-print("=" * 100, "\nEvaluating the model...")
+print("-" * 80, "\nEvaluating the model...")
 
 model_0.eval()
 
