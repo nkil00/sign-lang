@@ -8,7 +8,7 @@ from models.cnn_models import ConvSignLangNN
 from models.cnn_models import ConvSignLangNN_6
 from preprocessing import preprocessing
 from preprocessing.preprocessing import get_unique_labels
-from preprocessing.utils import generate_info
+from preprocessing.utils import generate_info, write_info
 
 import getopt
 import sys
@@ -16,7 +16,8 @@ import os
 
 from tqdm import tqdm
 
-MODEL_DIR = os.path.join(".", "models")
+INFO_DIR = os.path.join(".", "eval", "info")
+MODEL_DIR = os.path.join(".", "eval", "model-prm")
 IMG_DIR = os.path.join(".", "data", "sign_lang_train")
 LABEL_DIR = os.path.join(IMG_DIR, "labels.csv")
 
@@ -206,8 +207,14 @@ print(f"> The total accuracy of the model is: {accuracy:.2f}.\n")
 
 ### save model parameters
 model_name = f"model-{total_test_losses[-1]:.3f}"
-MODEL_DIR = os.path.join(MODEL_DIR, "state_dicts", f"{model_name}.pth")
+MODEL_DIR = os.path.join(MODEL_DIR, f"{model_name}.pth")
 torch.save(model_0.state_dict(), MODEL_DIR)
 print("=" * 100, f"\nSaved model: {model_name}")
+
+### write info file
+INFO_DIR = os.path.join(INFO_DIR, model_name, ".md")
+write_info(info_str, INFO_DIR)
+
+
 
 
