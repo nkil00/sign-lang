@@ -41,8 +41,8 @@ def filter_by_label(label: str, dataframe: pd.DataFrame, col_name: str = "label"
 	return df[df[col_name] == label]
 
 def generate_info(epochs, batch_size, train_size, test_size, lr, model, binds=80) -> str:
-    sep = "-"*binds + "\n"
-    date = "# <Date>\n\n"
+    sep = "-"*binds
+    date = f"# {datetime.now().strftime('%Y.%m-%d %H:%M:%S')}\n\n"
     ep  = f"- Epochs: {epochs}\n"
     bs = f"- Batch Size: {batch_size}\n"
     trs = f"- Trainset Size: {train_size}\n"
@@ -54,3 +54,8 @@ def generate_info(epochs, batch_size, train_size, test_size, lr, model, binds=80
 
     return info_str
     
+def write_info(info_str: str, file_path: os.path, add_info: str = None):
+    with open(file_path, "w") as p:
+        p.write(info_str)
+        if add_info not None:
+            p.write(add_info)
