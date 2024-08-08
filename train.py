@@ -4,8 +4,7 @@ import torch.nn.functional as F
 
 import numpy as np
 
-from models.cnn_models import ConvSignLangNN
-from models.cnn_models import ConvSignLangNN_6
+from models.cnn_models import ConvSignLangNN, ConvSignLangNN_7, ConvSignLangNN_6
 from preprocessing import preprocessing
 from preprocessing.preprocessing import get_unique_labels
 from preprocessing.utils import generate_info, write_info
@@ -117,7 +116,7 @@ train_size = len(train_loader.dataset)
 test_size = len(test_loader.dataset)
 
 ### model initialization
-model_0 = ConvSignLangNN_6()
+model_0 = ConvSignLangNN_7()
 optim = torch.optim.Adam(params=model_0.parameters(), lr = LEARNING_RATE)
 loss_fn_0 = torch.nn.CrossEntropyLoss()
 
@@ -203,7 +202,8 @@ torch.save(model_0.state_dict(), MODEL_DIR)
 print("=" * 100, f"\nSaved model: {model_name}")
 
 ### write info file
-INFO_DIR = os.path.join(INFO_DIR, model_name, ".md")
+INFO_DIR = os.path.join(INFO_DIR, model_name + ".md")
+info_str += f"\nAccuracy: {accuracy * 100:.3f}%"
 write_info(info_str, INFO_DIR)
 
 
