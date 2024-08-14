@@ -15,7 +15,7 @@ LABEL_DIR = os.path.join(IMAGE_DIR, "labels.csv")
 
 IMG_HEIGHT = 128
 
-def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str = None):
+def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str | os.PathLike = ""):
     if df is None:
         df = pd.read_csv(file_path)
     cls = df[col_name].unique()
@@ -32,13 +32,11 @@ def data_distribution(df: pd.DataFrame) -> dict:
     
     return cls_cups
 
-def augment_data(df: pd.DataFrame, train_cls_indiv: dict, threshold: int=300, img_dir: os.path = None) -> SignLanguageDataset:
+def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.PathLike,threshold: int=300) -> SignLanguageDataset:
     # 
-    cls_uq = get_unique_labels(df)
     cls_cups = data_distribution(df)
 
     cls_to_augment = {l: train_cls_indiv[l] for l in train_cls_indiv.keys() if cls_cups[l] < threshold}
-    cls_nto_augment = {l: train_cls_indiv[l] for l in train_cls_indiv.keys() if cls_cups[l] >= threshold}
 
     aug_datasets = []
 
@@ -61,7 +59,7 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, threshold: int=300, im
 
     return train_dataset
 
-def create_data_sets(label_dir: os.path, img_dir: os.path, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True):
+def create_data_sets(label_dir: str | os.PathLike, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True):
     img_label_df = pd.read_csv(label_dir)
     unique_labels = get_unique_labels(img_label_df)
 
@@ -85,7 +83,11 @@ def create_data_sets(label_dir: os.path, img_dir: os.path, train_size:float=0.8,
 
 
 
-def create_data_loaders(batch_size=32, train_size=0.8, label_dir: os.path = None, img_dir: os.path = None, augment_data:bool = True):
+def create_data_loaders(batch_size=32, train_size=0.8, label_dir: str | os.PathLike = "", img_dir: str |
+    os.PathLike = "", augment_data:bool = True):
+    if label_dir == "": print("Please provide a path for the labels file!")
+    if img_dir == "":  print("Please provide a path for the img files!")
+        
     train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size, augment=augment_data)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)

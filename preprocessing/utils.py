@@ -25,14 +25,14 @@ def augmented_transform(H, W):
 					   v2.RandomHorizontalFlip(p=1),
 	                   v2.RandomVerticalFlip(p=1),
 	                   transforms.ToTensor(),
-#	                   _normalization_def
+	                   _normalization_def
 	                   ])
 
 
 def default_transform(H, W):
 	return transforms.Compose([v2.Resize((H, W)),
 	                           transforms.ToTensor(),
-#	                           _normalization_def
+	                           _normalization_def
 	                           ])
 
 
@@ -49,13 +49,13 @@ def generate_info(epochs, batch_size, train_size, test_size, lr, model, binds=80
     trs = f"- Trainset Size: {train_size}\n"
     tes = f"- Testset Size: {test_size}\n"
     lr = f"- Learning Rate: {lr}\n"
-    modelstr = f"model: ```\n{model}\n```\n"
+    modelstr = f"model:\n```\n{model}\n```\n"
     
     info_str = date + sep + ep + lr + bs + trs + tes + lr + sep + modelstr + sep
 
     return info_str
     
-def write_info(info_str: str, file_path: os.path, add_info: str = None):
+def write_info(info_str: str, file_path: str | os.PathLike, add_info: str = ""):
     with open(file_path, "w") as p:
         p.write(info_str)
         if add_info is not None:
