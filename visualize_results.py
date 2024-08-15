@@ -8,6 +8,8 @@ from eval.evaluation import prediction_matrix, predictions_actual
 import os
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 import torch
 
 
@@ -23,7 +25,7 @@ def plt_data_distribution(path: str | os.PathLike):
     plot_data_distribution(df)
 
 def plt_predictions(model, test_loader, index_class, unique_labels):
-    plot_predictions(model, test_loader,  index_class, unique_labels)
+    plot_predictions(model, index_class, test_loader, unique_labels)
 
 
 
@@ -41,6 +43,10 @@ def main():
                         dest="show_predictions",
                         action="store_true")
 
+    parser.add_argument("-M",
+                        "--prediction_matrix",
+                        dest = "pred_mat",
+                        action="store_true")
     args = parser.parse_args()
 
     model_dir = os.path.join(".", "eval", "model-prm", args.model_name)
@@ -55,13 +61,21 @@ def main():
     index_class = {idx:label for idx, label in enumerate(unique_labels)}
 
     if args.ddistr:
+        print("Start plot data distribution..")
         plt_data_distribution(DATA_PATH)
+        print("Done plot data distribution..")
+
     if args.show_predictions:
+        print("Start plot data pred..")
         plt_predictions(model, test_loader, index_class, unique_labels)
-    
-    upred, uactual = predictions_actual(model, test_loader, index_class)
-    pred_mat = prediction_matrix(upred, uactual, unique_labels)
-    plot_prediction_matrix(pred_mat, unique_labels).show()
+        print("Done plot data pred..")
+
+    if args.pred_mat:
+        print("Start plot pred mat..")
+        upred, uactual = predictions_actual(model, test_loader, index_class)
+        pred_mat = prediction_matrix(upred, uactual, unique_labels)
+        plot_prediction_matrix(pred_mat, unique_labels)
+        print("End plot pred mat..")
 
 if __name__ == "__main__":
     main()

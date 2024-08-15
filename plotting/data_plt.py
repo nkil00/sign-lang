@@ -37,7 +37,7 @@ def plot_data_distribution(df: pd.DataFrame):
     plt.xlabel = "Different Classes" 
     plt.title("Distribution of Elements per Class in Whole Dataset")
 
-    plt.show()
+    return plt
 
  
 def conv_idx_prediction_to_class(batch_predictions: np.ndarray, idx_class_dict: dict):
@@ -106,12 +106,11 @@ def plot_prediction_matrix(pred_mat, labels):
 
     plt.xticks(range(len(labels)), labels, size="small")
     plt.yticks(range(len(labels)), labels, size="small")
-    plt.ylabel("Actual Label")
-    plt.xlabel("Predicted Label")
+    #plt.ylabel("Actual Label")
+    #plt.xlabel("Predicted Label")
 
     plt.grid(linewidth=.1)
-
-    return plt
+    plt.show()
 
 
 
