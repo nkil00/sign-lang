@@ -9,6 +9,7 @@ from preprocessing import preprocessing
 from preprocessing.preprocessing import get_unique_labels
 from preprocessing.utils import generate_info, write_info
 
+from datetime import datetime
 import getopt
 import sys
 import os
@@ -41,7 +42,7 @@ def conv_idx_prediction_to_class(predictions: np.ndarray, idx_label_dict: dict):
     :return: a list of length BATCH_SIZE 
     """
     class_predictions = []
-    for smp_predictions in batches_predictions:
+    for smp_predictions in predictions:
         final_prediction_num = np.argmax(smp_predictions)
         final_prediction = idx_label_dict[final_prediction_num]
         class_predictions.append(final_prediction)
@@ -66,20 +67,6 @@ def train_batch(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_
     optimizer.step()
     
     return batch_loss.item()
-
-def conv_idx_prediction_to_class(batch_predictions: np.ndarray, idx_class_dict: dict):
-    """
-    :param batch_predictions:  of which the _rows_ are the probabilities of a sample to belong to the specific class (at idx), _cols_ are samples (should be BATCH_SIZE columns)
-    :param idx_class_dict: dictionary where a numerical value is mapped to its class, e.g. {0: "l", 1: "a", ...}
-    :return: a list of length BATCH_SIZE 
-    """
-    class_predictions = []
-    for smp_predictions in batch_predictions:
-        final_prediction_num = np.argmax(smp_predictions)
-        final_prediction = idx_class_dict[final_prediction_num]
-        class_predictions.append(final_prediction)
-        
-    return class_predictions
 
 ### read in hyper_params
 args_list = sys.argv[1:]
@@ -118,9 +105,10 @@ test_size = len(test_loader.dataset)
 ### model initialization
 model_0 = ConvSignLangNN_7()
 optim = torch.optim.Adam(params=model_0.parameters(), lr = LEARNING_RATE)
+print(optim)
 loss_fn_0 = torch.nn.CrossEntropyLoss()
 
-info_str = generate_info(EPOCHS, BATCH_SIZE, train_size, test_size, LEARNING_RATE, model_0)
+info_str = generate_info(EPOCHS, BATCH_SIZE, train_size, test_size, LEARNING_RATE, model_0, optim)
 
 print(info_str)
 
@@ -196,7 +184,9 @@ print(f"> The total accuracy of the model is: {accuracy:.2f}.\n")
 
 
 ### save model parameters
-model_name = f"model-{total_test_losses[-1]:.3f}"
+
+date = f"{datetime.now().strftime('%m-%d--%H:%M')}"
+model_name = f"model_{total_test_losses[-1]:.3f}_{date}"
 MODEL_DIR = os.path.join(MODEL_DIR, f"{model_name}.pth")
 torch.save(model_0.state_dict(), MODEL_DIR)
 print("=" * 100, f"\nSaved model: {model_name}")
