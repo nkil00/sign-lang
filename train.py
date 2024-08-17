@@ -50,7 +50,7 @@ def conv_idx_prediction_to_class(predictions: np.ndarray, idx_label_dict: dict):
     return class_predictions
 
 def label_to_int_index(label: str, class_index_dict: dict):
-    return class_index[label]
+    return class_index_dict[label]
 
 def train_batch(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function):
     # enable training
