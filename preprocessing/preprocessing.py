@@ -22,6 +22,13 @@ def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str 
 
     return cls
 
+def get_class_index_dict(df: pd.DataFrame, col_name = "label") -> dict:
+    labels = get_unique_labels(df, col_name)
+    class_idx_dict = {l: idx for idx, l in enumerate(labels)}
+
+    return class_idx_dict
+
+
 def data_distribution(df: pd.DataFrame) -> dict:
     uq_labels = get_unique_labels(df)
     cls_cups = {cls:0 for cls in uq_labels}
