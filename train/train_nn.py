@@ -1,5 +1,7 @@
 from torch import nn
 import torch
+import numpy as np
+
 # conversion functions
 def label_to_int_index(label: str | list, class_index_dict: dict):
     """
@@ -21,7 +23,7 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
 
     model.train()
     img, tar = batch
-    index_of_label = torch.tensor(label_to_int_index(tar, class_index), dtype=torch.long)
+    index_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
 
     # begin training
     optimizer.zero_grad()
@@ -32,13 +34,25 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
     
     return batch_loss.item()
 
-def predict(model: torch.nn.Module, batch, loss_function, class_index):
+def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_index):
     if model.training: model.eval()
     
     feat, tar = batch
     out = model(feat)
-    idx_of_label = label_to_int_index(tar, class_index)
+    idx_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
     loss = loss_function(out, idx_of_label)
 
     return loss
+
+def predict_batch(model: torch.nn.Module, batch) -> np.ndarray:
+    """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """
+    model.eval()
+    with torch.no_grad():
+        feat, _ = batch
+        predictions = model(feat)
+        preds_max = np.argmax(predictions, axis=1)
+
+    return preds_max
+
+
 
