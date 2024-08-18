@@ -97,8 +97,8 @@ def create_data_loaders(batch_size=32, train_size=0.8, label_dir: str | os.PathL
         
     train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size, augment=augment_data)
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
+    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True, drop_last=True)
 
     return train_loader, test_loader
 
