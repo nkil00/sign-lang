@@ -4,8 +4,7 @@ from .utils import default_transform, augmented_transform
 from .utils import filter_by_label
 from .dataset import SignLanguageDataset
 
-from torch.utils.data import ConcatDataset
-from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset, DataLoader, Dataset
 
 import pandas as pd
 import os
@@ -39,7 +38,7 @@ def data_distribution(df: pd.DataFrame) -> dict:
     
     return cls_cups
 
-def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.PathLike,threshold: int=300) -> SignLanguageDataset:
+def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.PathLike,threshold: int=300) -> Dataset:
     # 
     cls_cups = data_distribution(df)
 
