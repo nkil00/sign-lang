@@ -8,8 +8,10 @@ from datetime import datetime
 
 import pandas as pd
 from preprocessing.preprocessing import create_data_loaders, get_class_index_dict
-
+from preprocessing.utils import write_info
 from train.train_nn import train_batch_classification, evaluate_batch_loss, predict_batch, label_to_int_index
+
+
 
 import os
 
@@ -94,6 +96,9 @@ class TrainSignLang():
 
             if vocal: print(f"Epoch \"{epoch}\" done. | Loss = {epoch_test_loss:.3f}")
 
+        date = datetime.now().strftime("%m:%d-%H:%M")
+        loss = self.test_losses[-1]
+        self.model_name = f"model_L-{loss:.4f}--{date}"
 
     def evaluate(self, vocal=False):
         """
@@ -111,6 +116,7 @@ class TrainSignLang():
 
 
         accuracy = correct / self.len_tel
+        self.accuracy = accuracy
         if vocal: print(f"accuracy = {accuracy}, test-loss={final_loss}")
 
         return accuracy, final_loss
@@ -132,15 +138,27 @@ class TrainSignLang():
 
         return self_str
 
+
     def save_model(self, dir: str | os.PathLike, vocal=False):
         if self.model is None:
             print("ERROR: Model has not been initialized yet.")
             return 
-        
-        date = datetime.now().strftime("%m:%d-%H:%M")
+
+        torch.save(self.model.state_dict(), os.path.join(dir, self.model_name + ".pth"))
+
+        if vocal: print(f"Saved model: \"{self.model_name}\"")
+
+
+    def save_info(self, info_dir: str | os.PathLike):
+        if self.test_losses is None:
+            print("ERROR: Model has not been trained yet. Can't save the model!")
+            return
+        sep = "-" * 80 + "\n"
         loss = self.test_losses[-1]
-        model_name = f"model_L-{loss:.4f}--{date}"
+        accuracy = self.accuracy
+        info = self.__str__() + f"- Accuracy: {accuracy:.3f}\n- Loss: {loss:.3f}\n{sep}"
 
-        torch.save(self.model.state_dict, os.path.join(dir, model_name))
+        with open(os.path.join(info_dir, self.model_name + ".md"), "w") as w:
+            w.write(info)
 
-        if vocal: print(f"Saved model: \"{model_name}\"")
+

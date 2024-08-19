@@ -42,7 +42,7 @@ def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_inde
     idx_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
     loss = loss_function(out, idx_of_label)
 
-    return loss
+    return loss.item()
 
 def predict_batch(model: torch.nn.Module, batch) -> np.ndarray:
     """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """
