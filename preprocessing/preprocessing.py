@@ -14,6 +14,7 @@ LABEL_DIR = os.path.join(IMAGE_DIR, "labels.csv")
 
 IMG_HEIGHT = 128
 
+## helper
 def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str | os.PathLike = ""):
     if df is None:
         df = pd.read_csv(file_path)
@@ -27,6 +28,31 @@ def get_class_index_dict(df: pd.DataFrame, col_name = "label") -> dict:
 
     return class_idx_dict
 
+def stratified_sample(df, label_col, sample_fraction):
+    # Ensure the sample fraction is between 0 and 1
+    if not (0 < sample_fraction <= 1):
+        raise ValueError("sample_fraction must be a float between 0 and 1.")
+    
+    # Calculate the sample size
+    sample_size = int(len(df) * sample_fraction)
+
+    # Calculate the fraction of each label in the original DataFrame
+    label_distribution = df[label_col].value_counts(normalize=True)
+
+    # Perform stratified sampling
+    sampled_dfs = []
+
+    for label, fraction in label_distribution.items():
+        label_subset = df[df[label_col] == label]
+        n_samples = int(round(fraction * sample_size))
+        
+        # Sample the calculated number of rows from this subset
+        sampled_dfs.append(label_subset.sample(n=n_samples, replace=False))
+
+    # Concatenate all sampled subsets into a single DataFrame
+    stratified_sample_df = pd.concat(sampled_dfs, ignore_index=True)
+
+    return stratified_sample_df
 
 def data_distribution(df: pd.DataFrame) -> dict:
     uq_labels = get_unique_labels(df)
@@ -65,14 +91,16 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
 
     return train_dataset
 
-def create_data_sets(label_dir: str | os.PathLike, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True):
+def create_data_sets(label_dir: str | os.PathLike, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True, sample_ratio: float = 1):
     img_label_df = pd.read_csv(label_dir)
     unique_labels = get_unique_labels(img_label_df)
+
+    img_label_df = stratified_sample(img_label_df, "label", sample_ratio)
 
     train_labels, test_labels = train_test_split(img_label_df,
                                                  train_size=train_size, 
                                                  stratify=img_label_df[label_col_name],
-                                                 random_state=None)
+                                                 random_state=random_state)
     train_labels_indiv = {l: filter_by_label(l, train_labels) for l in unique_labels}
 
 
@@ -90,11 +118,11 @@ def create_data_sets(label_dir: str | os.PathLike, img_dir: str | os.PathLike, t
 
 
 def create_data_loaders(batch_size=32, train_size=0.8, label_dir: str | os.PathLike = "", img_dir: str |
-    os.PathLike = "", augment_data:bool = True):
+    os.PathLike = "", augment_data:bool = True, sample_ratio: float = 1.0):
     if label_dir == "": print("Please provide a path for the labels file!")
     if img_dir == "":  print("Please provide a path for the img files!")
         
-    train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size, augment=augment_data)
+    train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size, augment=augment_data, sample_ratio=sample_ratio)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True, drop_last=True)

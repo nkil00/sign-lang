@@ -47,8 +47,9 @@ class TrainSignLang():
     def init_data(self, 
                   image_dir: os.PathLike | str,
                   labels_path: os.PathLike | str,
-                  augment_data: bool = True):
-        train_loader, test_loader = create_data_loaders( self.batch_size, self.train_set_size, img_dir = image_dir, label_dir = labels_path, augment_data=augment_data)
+                  augment_data: bool = True,
+                  sample_ratio: float = 1.0):
+        train_loader, test_loader = create_data_loaders( self.batch_size, self.train_set_size, img_dir = image_dir, label_dir = labels_path, augment_data=augment_data, sample_ratio=sample_ratio)
 
         self._df = pd.read_csv(labels_path)
         self.train_loader = train_loader

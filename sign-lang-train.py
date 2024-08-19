@@ -31,8 +31,9 @@ def grid_lr(grid_params: dict):
                                       lr=lr,
                                       train_set_size=0.8,
                                       batch_size=bs)
-                tsm.init_data(image_dir=IMG_DIR,
-                                labels_path=LABEL_PATH)
+                tsm.init_data(image_dir=IMG_DIR, 
+                              labels_path=LABEL_PATH,
+                              sample_ratio=0.05)
 
                 model = ConvSignLangNN_7()
                 lossf = CrossEntropyLoss()
@@ -46,10 +47,10 @@ def grid_lr(grid_params: dict):
     
 
 if __name__ == "__main__":
-    lrs = [0.001, 0.005, 0.0001]
+    lrs = [0.001]
     grid_params = {
         "lr": lrs,
-        "batch_size": [32, 64, 256],
-        "epochs": [10, 15]
+        "batch_size": [32],
+        "epochs": [10]
     }
     grid_lr(grid_params)
