@@ -55,7 +55,7 @@ def conv_idx_prediction_to_class(batch_predictions: np.ndarray, idx_class_dict: 
         
     return class_predictions
 
-def plot_predictions(model: nn.Module, index_class: dict, data_loader: DataLoader, labels: list):
+def plot_predictions(model: nn.Module, model_name: str, index_class: dict, data_loader: DataLoader, labels: list):
     """
     plots the distribution of actual labels in a data loader, such as the distribution of the
     predictions of the data loader
@@ -93,17 +93,18 @@ def plot_predictions(model: nn.Module, index_class: dict, data_loader: DataLoade
     dcolors = list(colors.keys())[:num_classes]
     # plot prediction distribution
     ax[1].bar(range(num_classes), list(pr_labels_cups.values()), tick_label = labels, color=dcolors)
-    ax[1].set_title("Distribution of Predictions")
+    ax[1].set_title(f"Distribution of Predictions ({model_name})")
 
     ax[0].bar(range(num_classes), list(ac_labels_cups.values()), tick_label = labels, color=dcolors)
-    ax[0].set_title("Distribution of Elements in DataLoader")
+    ax[0].set_title(f"Distribution of Elements in DataLoader ({model_name})")
     plt.show()
 
-def plot_prediction_matrix(pred_mat, labels):
+def plot_prediction_matrix(pred_mat, labels, model_name):
     plt.figure(figsize=(8, 8))
     plt.imshow(pred_mat)
     plt.colorbar()
 
+    plt.title(f"Prediction Matrix of ({model_name})")
     plt.xticks(range(len(labels)), labels, size="small")
     plt.yticks(range(len(labels)), labels, size="small")
     #plt.ylabel("Actual Label")

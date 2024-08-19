@@ -24,8 +24,8 @@ def plt_data_distribution(path: str | os.PathLike):
     # plot
     plot_data_distribution(df)
 
-def plt_predictions(model, test_loader, index_class, unique_labels):
-    plot_predictions(model, index_class, test_loader, unique_labels)
+def plt_predictions(model, model_name, test_loader, index_class, unique_labels):
+    plot_predictions(model, model_name,index_class, test_loader, unique_labels)
 
 
 
@@ -49,10 +49,15 @@ def main():
                         action="store_true")
     args = parser.parse_args()
 
-    model_dir = os.path.join(".", "eval", "model-prm", args.model_name)
+    model_dir = os.path.join(".", "eval", "model-prm","grids",args.model_name)
 
+    print(model_dir)
     model = ConvSignLangNN_7()
-    model.load_state_dict(torch.load(model_dir))
+    try:
+        model.load_state_dict(torch.load(model_dir))
+    except FileNotFoundError as _:
+        print(f"The Path: {model_dir} is invalid!")
+        exit()
 
     _, test_loader = create_data_loaders(label_dir=DATA_PATH,
                                         img_dir=IMG_DIR, 
@@ -67,14 +72,14 @@ def main():
 
     if args.show_predictions:
         print("Start plot data pred..")
-        plt_predictions(model, test_loader, index_class, unique_labels)
+        plt_predictions(model, args.model_name, test_loader, index_class, unique_labels)
         print("Done plot data pred..")
 
     if args.pred_mat:
         print("Start plot pred mat..")
         upred, uactual = predictions_actual(model, test_loader, index_class)
         pred_mat = prediction_matrix(upred, uactual, unique_labels)
-        plot_prediction_matrix(pred_mat, unique_labels)
+        plot_prediction_matrix(pred_mat, unique_labels, args.model_name)
         print("End plot pred mat..")
 
 if __name__ == "__main__":
