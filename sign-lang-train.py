@@ -41,7 +41,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame):
                                           lr=lr,
                                           train_set_size=0.8,
                                           batch_size=bs,
-                                          device = "cpu")
+                                          device = "cuda")
                     tsm.init_data(image_dir=IMG_DIR, 
                                   label_df=df,
                                   sample_ratio=1,
