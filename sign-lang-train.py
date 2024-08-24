@@ -64,7 +64,7 @@ if __name__ == "__main__":
     grid_params = {
         "lr": lrs,
         "batch_size": [32],
-        "epochs": [10],
+        "epochs": [2],
         "thresholds" : [-1]
     }
     df = pd.read_csv(LABEL_PATH)
