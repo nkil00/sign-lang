@@ -51,11 +51,12 @@ def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_inde
 
     return loss.item()
 
-def predict_batch(model: torch.nn.Module, batch) -> np.ndarray:
+def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
     """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """
     model.eval()
     with torch.no_grad():
         feat, _ = batch
+        feat = feat.to(device)
         predictions = model(feat)
         preds_max = np.argmax(predictions, axis=1)
 

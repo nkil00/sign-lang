@@ -143,7 +143,7 @@ class TrainSignLang():
         correct = 0
         for b in tqdm(self.test_loader):
             _, tar = b
-            predictions = predict_batch(model=self.model, batch=b)
+            predictions = predict_batch(model=self.model, batch=b, device=self.device)
             tar_num = label_to_int_index(label=list(tar), class_index_dict=self._class_index_dict)
             correct += np.sum([1 for x, y in zip(predictions, tar_num) if x==y])
 
