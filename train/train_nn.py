@@ -38,12 +38,15 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
     
     return batch_loss.item()
 
-def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_index):
+def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_index, device):
     if model.training: model.eval()
     
     feat, tar = batch
+    feat = feat.to(device)
     out = model(feat)
     idx_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
+    idx_of_label = idx_of_label.to(device)
+
     loss = loss_function(out, idx_of_label)
 
     return loss.item()
