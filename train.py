@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 import numpy as np
 
-from models.cnn_models import ConvSignLangNN, ConvSignLangNN_7, ConvSignLangNN_6
+from models.cnn_models import ConvSignLangNN, ConvSignLangNN_7
 from preprocessing import preprocessing
 from preprocessing.preprocessing import get_unique_labels
 from preprocessing.utils import generate_info, write_info
