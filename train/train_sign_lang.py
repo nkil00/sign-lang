@@ -21,11 +21,13 @@ class TrainSignLang():
                  lr: float = 0.001,
                  batch_size: int = 32,
                  train_set_size: float = 0.8,
+                 device: str = "cpu"
                  ) -> None:
         self.epochs = epochs
         self.lr = lr
         self.batch_size = batch_size
         self.train_set_size = train_set_size
+        self.device = device
     
     def _init_optim(self):
         if self.optim_str is None or self.optim_str == "":
@@ -41,6 +43,7 @@ class TrainSignLang():
                    optim: str,
                    ):
         self.model = model
+        model.to(self.device)
         self.optim_str = optim; self._init_optim()
         self.loss_fn = loss_fn
 
@@ -82,8 +85,10 @@ class TrainSignLang():
         for epoch in range(self.epochs):
             # train on train set
             running_loss_train= 0
+            self.model.train()
             for batch in tqdm(self.train_loader):
                 feat, _ = batch
+                feat.to(self.device)
                 loss = train_batch_classification(self.model,
                                                   batch,
                                                   self.optimizer,
@@ -98,13 +103,16 @@ class TrainSignLang():
             # get test set loss
             self.model.eval()
             running_loss_test = 0
-            for batch in self.test_loader:
-                feat, _ = batch
-                loss = evaluate_batch_loss(model=self.model,
-                               batch=batch, 
-                               loss_function=self.loss_fn, 
-                               class_index=self._class_index_dict)
-                running_loss_test = running_loss_test + (loss * feat.size(0))
+
+            with torch.no_grad():
+                for batch in self.test_loader:
+                    feat, _ = batch
+                    feat.to(self.device)
+                    loss = evaluate_batch_loss(model=self.model,
+                                   batch=batch, 
+                                   loss_function=self.loss_fn, 
+                                   class_index=self._class_index_dict)
+                    running_loss_test = running_loss_test + (loss * feat.size(0))
 
             epoch_test_loss = running_loss_test / self.len_tel
             if epoch_test_loss < min_loss:
