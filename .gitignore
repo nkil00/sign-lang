@@ -1,6 +1,5 @@
 token.txt
 **/__pycache__/**
-**/__init__.py
 .DS_Store
 test.py
 
