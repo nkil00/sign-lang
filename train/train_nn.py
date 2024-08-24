@@ -18,11 +18,13 @@ def label_to_int_index(label: str | list, class_index_dict: dict):
 
 # train functions
 def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
-                class_index):
+                               class_index, device: str):
     # enable training
 
     model.train()
     img, tar = batch
+    img.to(device)
+    tar.to(device)
     index_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
 
     # begin training

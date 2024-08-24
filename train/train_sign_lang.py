@@ -97,7 +97,8 @@ class TrainSignLang():
                                                   batch,
                                                   self.optimizer,
                                                   self.loss_fn,
-                                                  self._class_index_dict)
+                                                  self._class_index_dict, 
+                                                  self.device)
                 
                 running_loss_train = running_loss_train + (loss * feat.size(0))
 
