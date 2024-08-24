@@ -23,10 +23,10 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
 
     model.train()
     img, tar = batch
-    img.to(device)
-    tar.to(device)
+    img = img.to(device)
+    tar = tar.to(device)
     index_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
-    index_of_label.to(device)
+    # index_of_label.to(device)
     # begin training
     optimizer.zero_grad()
     out = model(img)
