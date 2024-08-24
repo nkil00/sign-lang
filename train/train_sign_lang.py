@@ -73,6 +73,10 @@ class TrainSignLang():
             :param vocal: If True print info to console.
             :return: None
         """
+        if vocal: 
+            print(f"Starting training.")
+            print(f"Model is on device: {next(self.model.parameters()).device}")
+
         # setup
         self._class_index_dict = get_class_index_dict(self._df)
         best_params = self.model.state_dict()
