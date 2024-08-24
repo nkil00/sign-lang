@@ -116,7 +116,8 @@ class TrainSignLang():
                     loss = evaluate_batch_loss(model=self.model,
                                    batch=batch, 
                                    loss_function=self.loss_fn, 
-                                   class_index=self._class_index_dict)
+                                   class_index=self._class_index_dict,
+                                   device=self.device)
                     running_loss_test = running_loss_test + (loss * feat.size(0))
 
             epoch_test_loss = running_loss_test / self.len_tel
