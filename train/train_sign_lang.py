@@ -7,9 +7,9 @@ from tqdm import tqdm
 from datetime import datetime
 
 import pandas as pd
-from preprocessing.preprocessing import create_data_loaders, get_class_index_dict
-from train.train_nn import train_batch_classification, evaluate_batch_loss, predict_batch, label_to_int_index
-from preprocessing.preprocessing import balance_labels
+from ..preprocessing.preprocessing import create_data_loaders, get_class_index_dict
+from ..train.train_nn import train_batch_classification, evaluate_batch_loss, predict_batch, label_to_int_index
+from ..preprocessing.preprocessing import balance_labels
 
 
 
