@@ -1,10 +1,18 @@
+import sys
+import os
+
+# Get the directory of the current file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Add the directory to sys.path
+sys.path.append(current_dir)
+
 from train.train_sign_lang import TrainSignLang
 from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4
 
 from torch.nn import CrossEntropyLoss
 
 import pandas as pd
-import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
