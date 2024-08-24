@@ -23,7 +23,7 @@ def rotate_transform(H, W):
 def augmented_transform(H, W):
 	return v2.Compose([transforms.Resize((H, W)),
 					   v2.RandomHorizontalFlip(p=1),
-	                   v2.RandomVerticalFlip(p=1),
+	                   v2.RandomVerticalFlip(p=0.5),
 	                   transforms.ToTensor(),
 	                   _normalization_def
 	                   ])

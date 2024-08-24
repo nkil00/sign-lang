@@ -1,8 +1,9 @@
 from train.train_sign_lang import TrainSignLang
-from models.cnn_models import ConvSignLangNN_7
+from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4
 
 from torch.nn import CrossEntropyLoss
 
+import pandas as pd
 import os
 
 LABEL_PATH = os.path.join(".", "data", "sign_lang_train", "labels.csv") 
@@ -16,41 +17,47 @@ BATCH_SIZE = 32
 
 
 
-def grid_lr(grid_params: dict):
+def grid_lr(grid_params: dict, df: pd.DataFrame):
     lrs = grid_params["lr"]
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
-
+    thresholds = grid_params["thresholds"]
     for epoch in epochs:
         for bs in batch_size:
             for lr in lrs:
-                print("Epochs: ", epoch)
-                print("BatchSize: ", bs)
-                print("Learning Rate:", lr)
-                tsm = TrainSignLang(epochs=epoch,
-                                      lr=lr,
-                                      train_set_size=0.8,
-                                      batch_size=bs)
-                tsm.init_data(image_dir=IMG_DIR, 
-                              labels_path=LABEL_PATH,
-                              sample_ratio=0.05)
+                for th in thresholds:
+                    print("Epochs: ", epoch)
+                    print("BatchSize: ", bs)
+                    print("Learning Rate:", lr)
+                    print("Threshold: ", th)
+                    tsm = TrainSignLang(epochs=epoch,
+                                          lr=lr,
+                                          train_set_size=0.8,
+                                          batch_size=bs)
+                    tsm.init_data(image_dir=IMG_DIR, 
+                                  label_df=df,
+                                  sample_ratio=1,
+                                  threshold=th,
+                                  augment_data=True)
 
-                model = ConvSignLangNN_7()
-                lossf = CrossEntropyLoss()
-                tsm.init_model(model=model,
-                               loss_fn=lossf,
-                               optim="Adam")
-                tsm.train()
-                tsm.evaluate()
-                tsm.save_model(MODEL_DIR)
-                tsm.save_info(INFO_DIR)
-    
+                    model = ConvSignLangNN_4()
+                    lossf = CrossEntropyLoss()
+                    tsm.init_model(model=model,
+                                   loss_fn=lossf,
+                                   optim="Adam")
+                    tsm.train(vocal=True)
+                    tsm.evaluate(vocal=True)
+                    tsm.save_model(MODEL_DIR)
+                    tsm.save_info(INFO_DIR)
+        
 
 if __name__ == "__main__":
     lrs = [0.001]
     grid_params = {
         "lr": lrs,
         "batch_size": [32],
-        "epochs": [10]
+        "epochs": [10],
+        "thresholds" : [-1]
     }
-    grid_lr(grid_params)
+    df = pd.read_csv(LABEL_PATH)
+    grid_lr(grid_params, df)

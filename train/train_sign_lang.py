@@ -10,6 +10,7 @@ import pandas as pd
 from preprocessing.preprocessing import create_data_loaders, get_class_index_dict
 from preprocessing.utils import write_info
 from train.train_nn import train_batch_classification, evaluate_batch_loss, predict_batch, label_to_int_index
+from preprocessing.preprocessing import balance_labels
 
 
 
@@ -46,20 +47,34 @@ class TrainSignLang():
 
     def init_data(self, 
                   image_dir: os.PathLike | str,
-                  labels_path: os.PathLike | str,
+                  label_df: pd.DataFrame,
                   augment_data: bool = True,
-                  sample_ratio: float = 1.0):
-        train_loader, test_loader = create_data_loaders( self.batch_size, self.train_set_size, img_dir = image_dir, label_dir = labels_path, augment_data=augment_data, sample_ratio=sample_ratio)
-
-        self._df = pd.read_csv(labels_path)
+                  sample_ratio: float = 1.0,
+                  threshold: int = -1):
+        if threshold > 0: label_df = balance_labels(label_df,
+                                                    threshold=threshold)
+        train_loader, test_loader = create_data_loaders(img_dir=image_dir,
+                                                        label_df=label_df, 
+                                                        batch_size=self.batch_size, 
+                                                        train_size=self.train_set_size, 
+                                                        augment_data=augment_data, 
+                                                        sample_ratio=sample_ratio)
+        self._df = label_df
         self.train_loader = train_loader
         self.len_trl = len(train_loader.dataset)
         self.test_loader = test_loader
         self.len_tel = len(test_loader.dataset)
 
     def train(self, vocal=False):
+        """
+        Trains the network in the train set. Keeps track of the test and train losses over the epochs.
+            :param vocal: If True print info to console.
+            :return: None
+        """
         # setup
         self._class_index_dict = get_class_index_dict(self._df)
+        best_params = self.model.state_dict()
+        min_loss = float("inf")
 
         # training
         self.train_losses = []
@@ -93,13 +108,17 @@ class TrainSignLang():
                 running_loss_test = running_loss_test + (loss * feat.size(0))
 
             epoch_test_loss = running_loss_test / self.len_tel
+            if epoch_test_loss < min_loss:
+                best_params = self.model.state_dict()
+                min_loss = epoch_test_loss
             self.test_losses.append(epoch_test_loss)
 
-            if vocal: print(f"Epoch \"{epoch}\" done. | Loss = {epoch_test_loss:.3f}")
+            if vocal: print(f"Epoch \"{epoch}\" done. | test-loss = {epoch_test_loss:.3f} | train-loss = {epoch_loss_train:.3f}")
 
-        date = datetime.now().strftime("%m:%d-%H:%M")
+        date = datetime.now().strftime("%m%d-%H%M")
         loss = self.test_losses[-1]
-        self.model_name = f"model_L-{loss:.4f}--{date}"
+        self.model.load_state_dict(best_params)
+        self.model_name = f"model_L-{min_loss:.4f}--{date}"
 
     def evaluate(self, vocal=False):
         """
@@ -107,7 +126,7 @@ class TrainSignLang():
             params: vocal: if True, print the results to the console.
             return: 
         """
-        final_loss = self.test_losses[-1]
+        final_loss = min(self.test_losses)
         correct = 0
         for b in tqdm(self.test_loader):
             _, tar = b
@@ -139,6 +158,14 @@ class TrainSignLang():
 
         return self_str
 
+    def _gen_data_info(self):
+        binds = 80
+        sep = "-" * binds + "\n"
+        testr = f"- Size Test-Set: {self.len_tel}\n"
+        trstr = f"- Size Train-Set: {self.len_trl}\n"
+        ttstr = f"- Total Size: {len(self._df)}\n"
+
+        return trstr + testr + ttstr + sep
 
     def save_model(self, dir: str | os.PathLike, vocal=False):
         if self.model is None:
@@ -157,7 +184,7 @@ class TrainSignLang():
         sep = "-" * 80 + "\n"
         loss = self.test_losses[-1]
         accuracy = self.accuracy
-        info = self.__str__() + f"- Accuracy: {accuracy:.3f}\n- Loss: {loss:.3f}\n{sep}"
+        info = self.__str__() + self._gen_data_info() + f"- Accuracy: {accuracy:.3f}\n- Loss: {loss:.3f}\n{sep}"
 
         with open(os.path.join(info_dir, self.model_name + ".md"), "w") as w:
             w.write(info)

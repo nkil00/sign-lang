@@ -6,6 +6,7 @@ from .dataset import SignLanguageDataset
 
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
 
+import numpy as np
 import pandas as pd
 import os
 
@@ -21,7 +22,6 @@ def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str 
     cls = df[col_name].unique()
 
     return cls
-
 def get_class_index_dict(df: pd.DataFrame, col_name = "label") -> dict:
     labels = get_unique_labels(df, col_name)
     class_idx_dict = {l: idx for idx, l in enumerate(labels)}
@@ -91,15 +91,14 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
 
     return train_dataset
 
-def create_data_sets(label_dir: str | os.PathLike, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True, sample_ratio: float = 1):
-    img_label_df = pd.read_csv(label_dir)
-    unique_labels = get_unique_labels(img_label_df)
+def create_data_sets(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True, sample_ratio: float = 1):
+    unique_labels = get_unique_labels(label_df)
 
-    img_label_df = stratified_sample(img_label_df, "label", sample_ratio)
+    label_df = stratified_sample(label_df, "label", sample_ratio)
 
-    train_labels, test_labels = train_test_split(img_label_df,
+    train_labels, test_labels = train_test_split(label_df,
                                                  train_size=train_size, 
-                                                 stratify=img_label_df[label_col_name],
+                                                 stratify=label_df[label_col_name],
                                                  random_state=random_state)
     train_labels_indiv = {l: filter_by_label(l, train_labels) for l in unique_labels}
 
@@ -114,20 +113,67 @@ def create_data_sets(label_dir: str | os.PathLike, img_dir: str | os.PathLike, t
 
     return train_dataset, test_dataset
 
+def balance_labels(df: pd.DataFrame, threshold: int = 300, label_col: str = "label"):
+    df_cpy = df.copy()
+    # get labels that are above the threshold
+    cups_classes = data_distribution(df_cpy)
+    cls_abv_thrs = {cls: num  for cls, num in zip(cups_classes.keys(), cups_classes.values()) 
+                    if cups_classes[cls] > threshold}
+
+    # remove samples such that they are at the threshold
+    for cl in cls_abv_thrs.keys():
+        n = cls_abv_thrs[cl] - threshold
+        label_idx = df_cpy[df_cpy[label_col] == cl].index
+        idx_to_drop = np.random.choice(label_idx, n, replace=False)
+        df_cpy.drop(idx_to_drop, inplace=True)
+
+    return df_cpy
 
 
-
-def create_data_loaders(batch_size=32, train_size=0.8, label_dir: str | os.PathLike = "", img_dir: str |
-    os.PathLike = "", augment_data:bool = True, sample_ratio: float = 1.0):
-    if label_dir == "": print("Please provide a path for the labels file!")
+def create_data_loaders(label_df: pd.DataFrame, img_dir: str | os.PathLike, batch_size=32, train_size=0.8, augment_data:bool = True, sample_ratio: float = 1.0):
     if img_dir == "":  print("Please provide a path for the img files!")
         
-    train_ds, test_ds = create_data_sets(label_dir, img_dir, train_size=train_size, augment=augment_data, sample_ratio=sample_ratio)
+    train_ds, test_ds = create_data_sets(label_df, img_dir, train_size=train_size, augment=augment_data, sample_ratio=sample_ratio)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True, drop_last=True)
 
     return train_loader, test_loader
+
+def split_df_labels(df: pd.DataFrame, label_col: str, labels: list[str]):
+    """
+    Takes as input a dataframe creates for each label an own dataframe, if not specified otherwise.
+
+    """
+    df_c = df.copy()
+    df_idx = df_c.index
+    # 
+    cls_cups = data_distribution(df)
+    dfs = {l: pd.DataFrame() for l in cls_cups.keys()}
+
+    for l in cls_cups.keys():
+        # get df part for labels
+        df_l = df[df[label_col] == l]
+        l_idx = df_l.index
+        n = len(df_l)
+
+        # sample n random rows that are NOT "l"
+        nl_idx = np.random.choice([i for i in df_idx if i not in l_idx], n, replace=False)
+        df_nl = df.iloc[nl_idx]
+        df_nl["label"] = "k"
+
+        # concate the single df's
+        df_l = pd.concat([df_l, df_nl])
+
+        dfs[l] = df_l
+
+    return dfs 
+
+
+
+
+
+
 
 def main():
     # get label info

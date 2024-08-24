@@ -18,6 +18,7 @@ class ConvSignLangNN(nn.Module):
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x))) # ([32, 8, 29, 29])
+
         # fully connected layers 
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
@@ -43,6 +44,7 @@ class ConvSignLangNN_7(nn.Module):
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x))) # ([32, 8, 29, 29])
+
         # fully connected layers 
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
@@ -86,11 +88,13 @@ class ConvSignLangNN_7_(nn.Module):
                  second_dim: int, 
                  third_dim: int, 
                  fourth_dim: int,
-                 fifth_dim: int):
+                 fifth_dim: int,
+                 conv1_in: int,
+                 conv2_in: int):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=4, )
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(16, 8, 5)
+        self.conv1 = nn.Conv2d(conv1_in, conv2_in, kernel_size=4, )
+        self.pool = nn.MaxPool2d(4, 4)
+        self.conv2 = nn.Conv2d(conv2_in, 8, 5)
         self.fc1 = nn.Linear(8*29*29, first_dim)
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
@@ -112,5 +116,25 @@ class ConvSignLangNN_7_(nn.Module):
         return x
 
 
+class ConvSignLangNN_4(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 16, 3)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(16, 8, 5)
+        self.fc1 = nn.Linear(8*29*29, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 84)
+        self.fc4 = nn.Linear(84, _num_classes)
+    
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x))) # ([32, 8, 29, 29])
+        # fully connected layers 
+        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
 
-
+        return x

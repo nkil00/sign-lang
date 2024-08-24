@@ -39,6 +39,7 @@ def plot_data_distribution(df: pd.DataFrame):
 
     return plt
 
+
  
 def conv_idx_prediction_to_class(batch_predictions: np.ndarray, idx_class_dict: dict):
     """
@@ -97,7 +98,7 @@ def plot_predictions(model: nn.Module, model_name: str, index_class: dict, data_
 
     ax[0].bar(range(num_classes), list(ac_labels_cups.values()), tick_label = labels, color=dcolors)
     ax[0].set_title(f"Distribution of Elements in DataLoader ({model_name})")
-    plt.show()
+    return plt
 
 def plot_prediction_matrix(pred_mat, labels, model_name):
     plt.figure(figsize=(8, 8))
@@ -111,8 +112,7 @@ def plot_prediction_matrix(pred_mat, labels, model_name):
     #plt.xlabel("Predicted Label")
 
     plt.grid(linewidth=.1)
-    plt.show()
-
+    return plt
 
 
     
