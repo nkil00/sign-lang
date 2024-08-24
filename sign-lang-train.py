@@ -6,16 +6,15 @@ from torch.nn import CrossEntropyLoss
 import pandas as pd
 import os
 
-LABEL_PATH = os.path.join(".", "data", "sign_lang_train", "labels.csv") 
-IMG_DIR = os.path.join(".", "data", "sign_lang_train")
-"./models/state_dicts/"
-MODEL_DIR = os.path.join(".", "eval", "model-prm", "grids")
-INFO_DIR = os.path.join(".", "eval", "info", "grids")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+LABEL_PATH = os.path.join(current_dir, "data", "sign_lang_train", "labels.csv") 
+IMG_DIR = os.path.join(current_dir, "data", "sign_lang_train")
+MODEL_DIR = os.path.join(current_dir, "eval", "model-prm", "grids")
+INFO_DIR = os.path.join(current_dir, "eval", "info", "grids")
 
 EPOCHS = 15
 BATCH_SIZE = 32
-
-
 
 def grid_lr(grid_params: dict, df: pd.DataFrame):
     lrs = grid_params["lr"]
