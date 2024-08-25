@@ -41,6 +41,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
                         print("BatchSize: ", bs)
                         print("Learning Rate:", lr)
                         print("Threshold: ", th)
+                        print("Data Augmentation: ", au)
                         tsm = TrainSignLang(epochs=epoch,
                                               lr=lr,
                                               train_set_size=0.8,
@@ -74,7 +75,7 @@ if __name__ == "__main__":
         device = "cpu"
 
     grid_params = {
-        "lr": [0.01, 0.001, 0.0001],
+        "lr": [0.001, 0.0001],
         "batch_size": [32, 64],
         "epochs": [10, 15, 20],
         "thresholds" : [-1],
