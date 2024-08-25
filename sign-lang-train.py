@@ -1,6 +1,8 @@
 import sys
 import os
 
+from argparse import ArgumentParser
+
 # Get the directory of the current file
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,7 +26,7 @@ INFO_DIR = os.path.join(current_dir, "eval", "info", "grids")
 EPOCHS = 15
 BATCH_SIZE = 32
 
-def grid_lr(grid_params: dict, df: pd.DataFrame):
+def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
     lrs = grid_params["lr"]
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
@@ -41,7 +43,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame):
                                           lr=lr,
                                           train_set_size=0.8,
                                           batch_size=bs,
-                                          device = "cuda")
+                                          device=device)
                     tsm.init_data(image_dir=IMG_DIR, 
                                   label_df=df,
                                   sample_ratio=1,
@@ -60,12 +62,20 @@ def grid_lr(grid_params: dict, df: pd.DataFrame):
         
 
 if __name__ == "__main__":
-    lrs = [0.001]
+    parser = ArgumentParser()
+    parser.add_argument("-d", "--device", dest="device")
+    args = parser.parse_args()
+
+    if args.device:
+        device = args.device
+    else:
+        device = "cpu"
+
     grid_params = {
-        "lr": lrs,
-        "batch_size": [32],
-        "epochs": [2],
+        "lr": [0.01, 0.001, 0.0001],
+        "batch_size": [32, 64],
+        "epochs": [10, 15, 20],
         "thresholds" : [-1]
     }
     df = pd.read_csv(LABEL_PATH)
-    grid_lr(grid_params, df)
+    grid_lr(grid_params, df, device)
