@@ -2,6 +2,8 @@ from torch import nn
 import torch
 import numpy as np
 
+from torch import Tensor
+
 # conversion functions
 def label_to_int_index(label: str | list, class_index_dict: dict):
     """
@@ -58,6 +60,7 @@ def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
         feat, _ = batch
         feat = feat.to(device)
         predictions = model(feat)
+        predictions = Tensor.cpu(predictions)
         preds_max = np.argmax(predictions, axis=1)
 
     return preds_max
