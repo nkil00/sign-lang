@@ -31,34 +31,36 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
     thresholds = grid_params["thresholds"]
+    augment = grid_params["augment"]
     for epoch in epochs:
         for bs in batch_size:
             for lr in lrs:
                 for th in thresholds:
-                    print("Epochs: ", epoch)
-                    print("BatchSize: ", bs)
-                    print("Learning Rate:", lr)
-                    print("Threshold: ", th)
-                    tsm = TrainSignLang(epochs=epoch,
-                                          lr=lr,
-                                          train_set_size=0.8,
-                                          batch_size=bs,
-                                          device=device)
-                    tsm.init_data(image_dir=IMG_DIR, 
-                                  label_df=df,
-                                  sample_ratio=1,
-                                  threshold=th,
-                                  augment_data=True)
+                    for au in augment:
+                        print("Epochs: ", epoch)
+                        print("BatchSize: ", bs)
+                        print("Learning Rate:", lr)
+                        print("Threshold: ", th)
+                        tsm = TrainSignLang(epochs=epoch,
+                                              lr=lr,
+                                              train_set_size=0.8,
+                                              batch_size=bs,
+                                              device=device)
+                        tsm.init_data(image_dir=IMG_DIR, 
+                                      label_df=df,
+                                      sample_ratio=1,
+                                      threshold=th,
+                                      augment_data=au)
 
-                    model = ConvSignLangNN_4()
-                    lossf = CrossEntropyLoss()
-                    tsm.init_model(model=model,
-                                   loss_fn=lossf,
-                                   optim="Adam")
-                    tsm.train(vocal=True)
-                    tsm.evaluate(vocal=True)
-                    tsm.save_model(MODEL_DIR)
-                    tsm.save_info(INFO_DIR)
+                        model = ConvSignLangNN_4()
+                        lossf = CrossEntropyLoss()
+                        tsm.init_model(model=model,
+                                       loss_fn=lossf,
+                                       optim="Adam")
+                        tsm.train(vocal=True)
+                        tsm.evaluate(vocal=True)
+                        tsm.save_model(MODEL_DIR)
+                        tsm.save_info(INFO_DIR)
         
 
 if __name__ == "__main__":
@@ -75,7 +77,8 @@ if __name__ == "__main__":
         "lr": [0.01, 0.001, 0.0001],
         "batch_size": [32, 64],
         "epochs": [10, 15, 20],
-        "thresholds" : [-1]
+        "thresholds" : [-1],
+        "augment" : [True, False]
     }
     df = pd.read_csv(LABEL_PATH)
     grid_lr(grid_params, df, device)

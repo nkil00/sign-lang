@@ -61,6 +61,7 @@ class TrainSignLang():
                                                         train_size=self.train_set_size, 
                                                         augment_data=augment_data, 
                                                         sample_ratio=sample_ratio)
+        self.augment_data = augment_data
         self._df = label_df
         self.train_loader = train_loader
         self.len_trl = len(train_loader.dataset)
@@ -177,6 +178,7 @@ class TrainSignLang():
         testr = f"- Size Test-Set: {self.len_tel}\n"
         trstr = f"- Size Train-Set: {self.len_trl}\n"
         ttstr = f"- Total Size: {len(self._df)}\n"
+        augstr = f"- Data Augmentation: {self.augment_data}"
 
         return trstr + testr + ttstr + sep
 
