@@ -185,6 +185,8 @@ class TrainSignLang():
             print("ERROR: Model has not been initialized yet.")
             return 
 
+        if not os.path.exists(dir): os.makedirs(dir)
+
         torch.save(self.model.state_dict(), os.path.join(dir, self.model_name + ".pth"))
 
         if vocal: print(f"Saved model: \"{self.model_name}\"")
@@ -199,6 +201,7 @@ class TrainSignLang():
         accuracy = self.accuracy
         info = self.__str__() + self._gen_data_info() + f"- Accuracy: {accuracy:.3f}\n- Loss: {loss:.3f}\n{sep}"
 
+        if not os.path.exists(info_dir): os.makedirs(info_dir)
         with open(os.path.join(info_dir, self.model_name + ".md"), "w") as w:
             w.write(info)
 
