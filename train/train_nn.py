@@ -58,7 +58,7 @@ def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
     model.eval()
     with torch.no_grad():
         feat, _ = batch
-        # feat = feat.detach().cpu()
+        feat = feat.to(device)
         predictions = model(feat)
         predictions = predictions.detach().cpu()
 
