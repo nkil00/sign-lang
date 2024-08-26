@@ -49,7 +49,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
                                               device=device)
                         tsm.init_data(image_dir=IMG_DIR, 
                                       label_df=df,
-                                      sample_ratio=.1,
+                                      sample_ratio=1,
                                       threshold=th,
                                       augment_data=au)
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     grid_params = {
         "lr": [0.001, 0.0001],
         "batch_size": [32],
-        "epochs": [1, 10, 15, 20],
+        "epochs": [10, 15, 20],
         "thresholds" : [-1],
         "augment" : [True, False]
     }
