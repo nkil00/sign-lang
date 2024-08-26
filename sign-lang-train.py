@@ -49,7 +49,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
                                               device=device)
                         tsm.init_data(image_dir=IMG_DIR, 
                                       label_df=df,
-                                      sample_ratio=1,
+                                      sample_ratio=.1,
                                       threshold=th,
                                       augment_data=au)
 
