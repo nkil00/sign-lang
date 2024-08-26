@@ -58,8 +58,9 @@ def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
     model.eval()
     with torch.no_grad():
         feat, _ = batch
-        feat = feat.to(device).clone().detach()
+        # feat = feat.detach().cpu()
         predictions = model(feat)
+        predictions = predictions.detach().cpu()
 
         preds_max = np.argmax(predictions, axis=1)
 
