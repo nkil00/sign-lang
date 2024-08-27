@@ -1,4 +1,5 @@
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 
 from .utils import default_transform, augmented_transform
 from .utils import filter_by_label
@@ -159,11 +160,16 @@ def split_df_labels(df: pd.DataFrame, label_col: str, labels: list[str]):
 
         # sample n random rows that are NOT "l"
         nl_idx = np.random.choice([i for i in df_idx if i not in l_idx], n, replace=False)
-        df_nl = df.iloc[nl_idx]
-        df_nl["label"] = "k"
+        df_nl = df.copy().iloc[nl_idx]
+        df_nl["label"] = "_"
 
         # concate the single df's
         df_l = pd.concat([df_l, df_nl])
+
+        # encode labels
+        lenc = LabelEncoder()
+        lenc.fit(df_l)
+        df_l = pd.DataFrame(lenc.transform(df_l))
 
         dfs[l] = df_l
 
