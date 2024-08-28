@@ -67,12 +67,14 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-d", "--device", dest="device")
+    parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
     args = parser.parse_args()
 
-    if args.device:
-        device = args.device
-    else:
-        device = "cpu"
+    device = "cpu"
+    if args.device: device = args.device
+
+    sample_ratio = 1
+    if args.sample_ratio: sample_ratio = args.sample_ratio
 
     grid_params = {
         "lr": [0.001, 0.0001],
