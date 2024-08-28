@@ -78,7 +78,6 @@ def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
         feat, _ = batch
         feat = feat.to(device)
         predictions = model(feat)
-        print("no max:", predictions)
         predictions = predictions.detach().cpu()
 
         preds_max = np.argmax(predictions, axis=1)
@@ -93,7 +92,6 @@ def predict_batch_binary(model: torch.nn.Module, batch, device) -> np.ndarray:
         feat, _ = batch
         feat = feat.to(device)
         predictions = model(feat)
-        print("no max:", predictions)
         predictions = predictions.detach().cpu()
 
         preds_max = np.round(predictions)
