@@ -7,6 +7,7 @@ from tqdm import tqdm
 from datetime import datetime
 
 import pandas as pd
+from train.train_suite import TrainSuite
 from preprocessing.preprocessing import create_data_loaders, get_class_index_dict
 from train.train_nn import train_batch_classification, evaluate_batch_loss, predict_batch, label_to_int_index
 from preprocessing.preprocessing import balance_labels
@@ -15,7 +16,7 @@ from preprocessing.preprocessing import balance_labels
 
 import os
 
-class TrainSignLang():
+class TrainSignLang(TrainSuite):
     def __init__(self,
                  epochs: int = 30,
                  lr: float = 0.001,
@@ -23,29 +24,12 @@ class TrainSignLang():
                  train_set_size: float = 0.8,
                  device: str = "cpu"
                  ) -> None:
-        self.epochs = epochs
-        self.lr = lr
-        self.batch_size = batch_size
-        self.train_set_size = train_set_size
-        self.device = device
+        super().__init__(epochs=epochs, 
+                         lr=lr, 
+                         batch_size=batch_size,
+                         train_set_size=train_set_size,
+                         device=device)
     
-    def _init_optim(self):
-        if self.optim_str is None or self.optim_str == "":
-            print("ERROR: Optimizer undefined.")
-            return
-        
-        if self.optim_str == "Adam":
-            self.optimizer = torch.optim.Adam(self.model.parameters(), self.lr)
-
-    def init_model(self,
-                   model: nn.Module,
-                   loss_fn,
-                   optim: str,
-                   ):
-        self.model = model
-        model.to(self.device)
-        self.optim_str = optim; self._init_optim()
-        self.loss_fn = loss_fn
 
     def init_data(self, 
                   image_dir: os.PathLike | str,

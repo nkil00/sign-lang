@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import pandas as pd
 import torch.nn as nn
 import torch
 import os
@@ -39,6 +40,16 @@ class TrainSuite(ABC):
 
 
     @abstractmethod
+    def init_data(self, 
+                  image_dir: os.PathLike | str,
+                  label_df: pd.DataFrame,
+                  augment_data: bool = True,
+                  sample_ratio: float = 1.0,
+                  threshold: int = -1):
+        pass
+
+
+    @abstractmethod
     def train(self, vocal=False):
         pass
 
@@ -48,15 +59,9 @@ class TrainSuite(ABC):
         pass
 
 
+    @abstractmethod
     def _gen_data_info(self):
-        binds = 80
-        sep = "-" * binds + "\n"
-        testr = f"- Size Test-Set: {self.len_tel}\n"
-        trstr = f"- Size Train-Set: {self.len_trl}\n"
-        ttstr = f"- Total Size: {len(self._df)}\n"
-        augstr = f"- Data Augmentation: {self.augment_data}"
-
-        return trstr + testr + ttstr + sep
+        pass
 
 
     @abstractmethod
