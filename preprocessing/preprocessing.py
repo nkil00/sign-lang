@@ -167,9 +167,9 @@ def split_df_labels(df: pd.DataFrame, label_col: str, labels: list[str]):
         df_l = pd.concat([df_l, df_nl])
 
         # encode labels
-        lenc = LabelEncoder()
-        lenc.fit(df_l)
-        df_l = pd.DataFrame(lenc.transform(df_l))
+        # lenc = LabelEncoder()
+        # lenc.fit(df_l)
+        # df_l = pd.DataFrame(lenc.transform(df_l))
 
         dfs[l] = df_l
 
