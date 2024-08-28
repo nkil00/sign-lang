@@ -26,7 +26,7 @@ INFO_DIR = os.path.join(current_dir, "eval", "info", "grids")
 EPOCHS = 15
 BATCH_SIZE = 32
 
-def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
+def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1):
     lrs = grid_params["lr"]
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
@@ -49,7 +49,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu"):
                                               device=device)
                         tsm.init_data(image_dir=IMG_DIR, 
                                       label_df=df,
-                                      sample_ratio=1,
+                                      sample_ratio=sample_ratio,
                                       threshold=th,
                                       augment_data=au)
 
@@ -74,14 +74,14 @@ if __name__ == "__main__":
     if args.device: device = args.device
 
     sample_ratio = 1
-    if args.sample_ratio: sample_ratio = args.sample_ratio
+    if args.sample_ratio: sample_ratio = float(args.sample_ratio)
 
     grid_params = {
         "lr": [0.001, 0.0001],
         "batch_size": [32],
-        "epochs": [10, 15, 20],
+        "epochs": [1, 10, 15, 20],
         "thresholds" : [-1],
         "augment" : [True, False]
     }
     df = pd.read_csv(LABEL_PATH)
-    grid_lr(grid_params, df, device)
+    grid_lr(grid_params, df, device, sample_ratio)
