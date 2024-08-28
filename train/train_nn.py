@@ -22,7 +22,6 @@ def label_to_int_index(label: str | list, class_index_dict: dict):
 def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
                                class_index, device: str):
     # enable training
-
     model.train()
     img, tar = batch
 
@@ -34,6 +33,25 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
     # begin training
     optimizer.zero_grad()
     out = model(img)
+    batch_loss = loss_function(out, index_of_label)
+    batch_loss.backward()
+    optimizer.step()
+    
+    return batch_loss.item()
+
+def train_batch_bclsfic(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
+                               class_index, device: str):
+    # enable training
+    model.train()
+    img, tar = batch
+
+    img = img.to(device)
+    index_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.float32)
+    index_of_label = index_of_label.to(device)
+
+    # begin training
+    optimizer.zero_grad()
+    out = torch.flatten(model(img))
     batch_loss = loss_function(out, index_of_label)
     batch_loss.backward()
     optimizer.step()
@@ -60,12 +78,27 @@ def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
         feat, _ = batch
         feat = feat.to(device)
         predictions = model(feat)
+        print("no max:", predictions)
         predictions = predictions.detach().cpu()
 
         preds_max = np.argmax(predictions, axis=1)
 
     return preds_max
 
+
+def predict_batch_binary(model: torch.nn.Module, batch, device) -> np.ndarray:
+    """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """
+    model.eval()
+    with torch.no_grad():
+        feat, _ = batch
+        feat = feat.to(device)
+        predictions = model(feat)
+        print("no max:", predictions)
+        predictions = predictions.detach().cpu()
+
+        preds_max = np.round(predictions)
+
+    return preds_max
 
 
 
