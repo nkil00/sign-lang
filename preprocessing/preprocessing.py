@@ -131,7 +131,12 @@ def balance_labels(df: pd.DataFrame, threshold: int = 300, label_col: str = "lab
     return df_cpy
 
 
-def create_data_loaders(label_df: pd.DataFrame, img_dir: str | os.PathLike, batch_size=32, train_size=0.8, augment_data:bool = True, sample_ratio: float = 1.0):
+def create_data_loaders(label_df: pd.DataFrame,
+                        img_dir: str | os.PathLike, 
+                        batch_size=32, 
+                        train_size=0.8, 
+                        augment_data:bool = True, 
+                        sample_ratio: float = 1.0):
     if img_dir == "":  print("Please provide a path for the img files!")
         
     train_ds, test_ds = create_data_sets(label_df, img_dir, train_size=train_size, augment=augment_data, sample_ratio=sample_ratio)
