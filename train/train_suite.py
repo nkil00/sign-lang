@@ -17,27 +17,39 @@ class TrainSuite(ABC):
         self.batch_size = batch_size
         self.train_set_size = train_set_size
         self.device = device
+        self._df = None
+        self.model = None
 
 
     def _init_optim(self):
         if self.optim_str is None or self.optim_str == "":
-            print("ERROR: Optimizer undefined.")
-            return
+            raise ValueError("ERROR: Optimizer undefined.")
+            
         
-        if self.optim_str == "Adam":
+        if self.optim_str == "Adam" and not self._multi_model:
             self.optimizer = torch.optim.Adam(self.model.parameters(), self.lr)
+        elif self.optim_str == "Adam":
+            # init ALL models with optmizer
+            self.optimizer = {}
+            for mkey in self.model.keys():
+                self.optimizer[mkey] = torch.optim.Adam(self.model[mkey].parameters(), self.lr)
 
 
-    def init_model(self,
-                   model: nn.Module,
-                   loss_fn,
-                   optim: str,
-                   ):
+    def init_model(self, model: nn.Module | dict[nn.Module], loss_fn, optim: str,):
+        print("JLKJLK")
+        if type(model) == dict:
+            self._multi_model = True
+            for mkey in model.keys():
+                model[mkey].to(self.device)
+                self.loss_fn = loss_fn
+        else:
+            self._multi_model = False
+            self.model = model
+            model.to(self.device)
+            self.loss_fn = loss_fn
+
         self.model = model
-        model.to(self.device)
         self.optim_str = optim; self._init_optim()
-        self.loss_fn = loss_fn
-
 
     @abstractmethod
     def init_data(self, 

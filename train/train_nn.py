@@ -39,7 +39,7 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
     
     return batch_loss.item()
 
-def train_batch_bclsfic(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
+def train_batch_binary_classification(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
                                class_index, device: str):
     # enable training
     model.train()
@@ -70,6 +70,20 @@ def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_inde
     loss = loss_function(out, idx_of_label)
 
     return loss.item()
+
+def evaluate_batch_loss_binary(model: torch.nn.Module, batch, loss_function, class_index, device):
+    if model.training: model.eval()
+    
+    feat, tar = batch
+    feat = feat.to(device)
+    out = model(feat)
+    idx_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.float32)
+    idx_of_label = idx_of_label.to(device)
+
+    loss = loss_function(out, idx_of_label)
+
+    return loss.item()
+
 
 def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
     """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """
