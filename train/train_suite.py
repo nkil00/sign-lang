@@ -36,7 +36,7 @@ class TrainSuite(ABC):
 
 
     def init_model(self, model: nn.Module | dict[nn.Module], loss_fn, optim: str,):
-        print("JLKJLK")
+        print("Initializing models..")
         if type(model) == dict:
             self._multi_model = True
             for mkey in model.keys():

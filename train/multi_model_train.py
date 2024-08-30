@@ -4,6 +4,7 @@ from preprocessing.preprocessing import split_df_labels, create_data_loaders, ge
 from train.train_nn import train_batch_binary_classification, evaluate_batch_loss_binary, predict_batch_mm
 from sklearn.model_selection import train_test_split
 from torch import nn
+import numpy as np
 import torch
 import pandas as pd
 from tqdm import tqdm
@@ -83,14 +84,13 @@ class MultiModelTrainSignLang(TrainSuite):
 
         # train loops (train each model)
         for label in unique_labels:
-            if vocal: print(f"> Trainig model with label \"{label}\"")
 
             model = self.model[label] # critical
             train_loader = self.train_loader[label]
             test_loader = self.test_loader
             cls_idx = {label: 1, "_": 0}
 
-            from tqdm import tqdm
+            if vocal: print(f"> Trainig model with label \"{label}\" - Num Samples: {self.len_trl[label]}")
             for ep in tqdm(range(self.epochs)):
                 # train model
                 model.train()
@@ -111,23 +111,23 @@ class MultiModelTrainSignLang(TrainSuite):
                 # for batch in self.test_loss:
                 #     loss = evaluate_batch_loss_binary(model, batch, self.loss_fn, cls_idx, self.device)
 
-                if vocal: print(f"> Training Model with label \"{label}\" done.")
+            if vocal: print(f"> Training Model with label \"{label}\" done.")
 
 
     def evaluate(self, vocal=False):
         """ Get Accuracy of the suite/model """
         if vocal: print("> Starting evaluation...")
 
-        class_index = {key: i for i, key in enumerate(self.model.key()}
+        class_index = {key: i for i, key in enumerate(self.model.keys())}
         correct = 0
-        for batch in tqdm(self.test_loader:)
+        for batch in tqdm(self.test_loader):
             _, tar = batch
             prediction = predict_batch_mm(models=self.model,
                                           batch=batch,
                                           device=self.device)
             
             # convert string targets to numerical values
-            ntar = [class_index[l] for l list(tar)]
+            ntar = [class_index[l] for l in list(tar)]
             # accumualte each correct prediction per batch
             correct += np.sum([1 for x, y in zip(ntar, prediction) if x == y])
 

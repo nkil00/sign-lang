@@ -27,7 +27,7 @@ def train(epochs, lr, batch_size, train_set_size, device, df):
                     augment_data=False,
                     sample_ratio=1,
                     threshold=-1)
-    suite.evaluate()
+    print("ACC:", suite.evaluate())
     suite.train(vocal=True)
 
     print(suite.len_trl)
