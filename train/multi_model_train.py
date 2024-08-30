@@ -1,7 +1,8 @@
 from train.train_suite import TrainSuite
 
 from preprocessing.preprocessing import split_df_labels, create_data_loaders, get_unique_labels
-from train.train_nn import train_batch_binary_classification, evaluate_batch_loss_binary
+from train.train_nn import train_batch_binary_classification, evaluate_batch_loss_binary, predict_batch_mm
+from sklearn.model_selection import train_test_split
 from torch import nn
 import torch
 import pandas as pd
@@ -29,27 +30,46 @@ class MultiModelTrainSignLang(TrainSuite):
                   augment_data: bool = True,
                   sample_ratio: float = 1.0,
                   threshold: int = -1):
+        print("Initializing Data...")
         if self._multi_model is None:
             raise ValueError("ERROR: Initialize the model(s) first!")
         if self._multi_model == False:
             raise ValueError("ERROR: Provide a dictionary of the models instead of a single one!")
         
-        # create a df for each individual class
-        self._df = split_df_labels(df=label_df, label_col="label", labels = [""])
+        # first split into train/test sets
+        train_labels, test_labels = train_test_split(label_df,
+                                                     train_size=self.train_set_size,
+                                                     stratify=label_df["label"])
+
+        # reset indices of df's -> for split_df_labels()
+        train_labels.reset_index(inplace=True, drop=True)
+        test_labels.reset_index(inplace=True, drop=True)
+
+        # create a df for each individual class from train_labels
+        self._df = split_df_labels(df=train_labels, label_col="label", labels = [""])
         self.train_loader = {}
         self.test_loader = {}
         self.len_trl = {}
         self.len_tel = {}      
-        # create data loaders for each class
+
+        # create train data loaders for each class
         for lkey in self._df.keys():
-            self.train_loader[lkey], self.test_loader[lkey] = create_data_loaders(label_df=self._df[lkey],
+            self.train_loader[lkey], _ = create_data_loaders(label_df=self._df[lkey],
                                                                                   img_dir=image_dir,
                                                                                   batch_size=self.batch_size,
-                                                                                  train_size=self.train_set_size,
+                                                                                  train_size=0.99, # test samples are already excluded earlier
                                                                                   augment_data=augment_data,
                                                                                   sample_ratio=sample_ratio)
+            # create one test loader
+            _, self.test_loader = create_data_loaders(label_df=test_labels,
+                                                      img_dir=image_dir,
+                                                      batch_size=self.batch_size,
+                                                      train_size=0.02, # train loader needs to have > num classes elements...
+                                                      augment_data=augment_data,
+                                                      sample_ratio = sample_ratio)
+
             self.len_trl[lkey] = len(self.train_loader[lkey].dataset)
-            self.len_tel[lkey] = len(self.test_loader[lkey].dataset)
+            self.len_tel = len(self.test_loader.dataset)
 
 
 
@@ -63,11 +83,11 @@ class MultiModelTrainSignLang(TrainSuite):
 
         # train loops (train each model)
         for label in unique_labels:
-            if vocal: print("> Trainig model with label:", label)
+            if vocal: print(f"> Trainig model with label \"{label}\"")
 
             model = self.model[label] # critical
             train_loader = self.train_loader[label]
-            test_loader = self.test_loader[label]
+            test_loader = self.test_loader
             cls_idx = {label: 1, "_": 0}
 
             from tqdm import tqdm
@@ -88,12 +108,36 @@ class MultiModelTrainSignLang(TrainSuite):
                 epoch_train_loss = running_train_loss / self.len_trl[label]
 
                 # evaluate model
-                for batch in self.test_loss:
-                    loss = 
+                # for batch in self.test_loss:
+                #     loss = evaluate_batch_loss_binary(model, batch, self.loss_fn, cls_idx, self.device)
+
+                if vocal: print(f"> Training Model with label \"{label}\" done.")
 
 
     def evaluate(self, vocal=False):
-        pass
+        """ Get Accuracy of the suite/model """
+        if vocal: print("> Starting evaluation...")
+
+        class_index = {key: i for i, key in enumerate(self.model.key()}
+        correct = 0
+        for batch in tqdm(self.test_loader:)
+            _, tar = batch
+            prediction = predict_batch_mm(models=self.model,
+                                          batch=batch,
+                                          device=self.device)
+            
+            # convert string targets to numerical values
+            ntar = [class_index[l] for l list(tar)]
+            # accumualte each correct prediction per batch
+            correct += np.sum([1 for x, y in zip(ntar, prediction) if x == y])
+
+        accuracy = correct / self.len_tel
+
+        return accuracy
+
+         
+
+        
 
 
     def _gen_data_info(self):

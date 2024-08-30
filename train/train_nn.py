@@ -112,5 +112,30 @@ def predict_batch_binary(model: torch.nn.Module, batch, device) -> np.ndarray:
 
     return preds_max
 
+def predict_batch_mm(models: dict[nn.Module], batch, device) -> np.ndarray:
+    """ 
+    Let every model give a confidence for the corresponding label and pick the model with the highest conf. 
+    return: Returns the index of the model in sequence with the highest confidence.
+    
+    """
+    feat, tar = batch
+    feat = feat.to(device) # move feat tensor to device
+
+    preds_collctd = torch.tensor([])
+    with torch.no_grad():
+        for label in models.keys():
+            models[label].eval()
+            # predict, detach and stack 
+            pred_dtens = models[label](feat) # shape: (batch_size, 1)
+            preds = pred_dtens.detach().cpu()
+            preds_collctd = torch.hstack([preds_collctd, preds])
+
+    preds_collctd = preds_collctd.numpy() 
+    final_predictions = np.argmax(preds_collctd, axis=1) 
+
+    return final_predictions
+
+            
+
 
 

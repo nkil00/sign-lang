@@ -147,10 +147,8 @@ def create_data_loaders(label_df: pd.DataFrame,
     return train_loader, test_loader
 
 def split_df_labels(df: pd.DataFrame, label_col: str, labels: list[str]):
-    """
-    Takes as input a dataframe creates for each label an own dataframe, if not specified otherwise.
+    """ Takes as input a dataframe creates for each label an own dataframe, if not specified otherwise. """
 
-    """
     df_c = df.copy()
     df_idx = df_c.index
     # 
