@@ -160,11 +160,13 @@ def split_df_labels(df: pd.DataFrame, label_col: str, labels: list[str]):
         df_l = df[df[label_col] == l]
         l_idx = df_l.index
         n = len(df_l)
+        print("+ ", n, end="")
 
         # sample n random rows that are NOT "l"
         nl_idx = np.random.choice([i for i in df_idx if i not in l_idx], n, replace=False)
         df_nl = df.copy().iloc[nl_idx]
         df_nl["label"] = "_"
+        #print("Counter Labels: ", len(df_nl))
 
         # concate the single df's
         df_l = pd.concat([df_l, df_nl])
