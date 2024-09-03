@@ -88,11 +88,11 @@ if __name__ == "__main__":
     if args.sample_ratio: sample_ratio = float(args.sample_ratio)
 
     grid_params = {
-        "lr": [0.001, 0.0001],
+        "lr":         [0.001, 0.0001],
         "batch_size": [32],
-        "epochs": [10, 20],
-        "thresholds" : [-1],
-        "augment" : [True, False]
+        "epochs":     [20, 25],
+        "thresholds": [-1],
+        "augment" :   [True, False]
     }
 
     neurons = {"c1_in": [3],
