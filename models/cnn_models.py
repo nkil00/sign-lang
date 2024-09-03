@@ -181,7 +181,7 @@ class ConvSignLangNN_4_(nn.Module):
         self.fc1 = nn.Linear( 8* 6* 6, first_dim)
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
-        self.fc4 = nn.Linear(third_dim, fourth_dim,)
+        self.fc4 = nn.Linear(third_dim, _num_classes,)
     
     def forward(self, x):
         #print("", x.shape)
