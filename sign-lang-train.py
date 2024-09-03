@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from train.train_sign_lang import TrainSignLang
-from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4
+from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_
 
 from torch.nn import CrossEntropyLoss
 
@@ -26,7 +26,7 @@ INFO_DIR = os.path.join(current_dir, "eval", "info", "grids")
 EPOCHS = 15
 BATCH_SIZE = 32
 
-def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1):
+def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1, neurons=None):
     lrs = grid_params["lr"]
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
@@ -53,7 +53,16 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1):
                                       threshold=th,
                                       augment_data=au)
 
-                        model = ConvSignLangNN_4()
+                        if neurons == None:
+                            model = ConvSignLangNN_4()
+                        else:
+                            model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
+                                                      conv2_in=neurons["c2_in"][0],
+                                                      conv3_in=neurons["c3_in"][0],
+                                                      first_dim=neurons["l1"][0],
+                                                      second_dim=neurons["l2"][0],
+                                                      third_dim=neurons["l3"][0],
+                                                      fourth_dim=neurons["l4"][0])
                         lossf = CrossEntropyLoss()
                         tsm.init_model(model=model,
                                        loss_fn=lossf,
@@ -84,5 +93,14 @@ if __name__ == "__main__":
         "thresholds" : [-1],
         "augment" : [True, False]
     }
+
+    neurons = {"c1_in": [3],
+               "c2_in": [8],
+               "c3_in": [16],
+               "l1":    [256],
+               "l2":    [256],
+               "l3":    [128],
+               "l4":    [64]
+               }
     df = pd.read_csv(LABEL_PATH)
-    grid_lr(grid_params, df, device, sample_ratio)
+    grid_lr(grid_params, df, device, sample_ratio, neurons=neurons)
