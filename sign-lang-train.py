@@ -32,6 +32,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1, n
     epochs = grid_params["epochs"]
     thresholds = grid_params["thresholds"]
     augment = grid_params["augment"]
+    vocal = False
     for epoch in epochs:
         for bs in batch_size:
             for lr in lrs:
@@ -67,8 +68,8 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1, n
                         tsm.init_model(model=model,
                                        loss_fn=lossf,
                                        optim="Adam")
-                        tsm.train(vocal=True)
-                        tsm.evaluate(vocal=True)
+                        tsm.train(vocal=vocal)
+                        tsm.evaluate(vocal=vocal)
                         tsm.save_model(MODEL_DIR)
                         tsm.save_info(INFO_DIR)
         
