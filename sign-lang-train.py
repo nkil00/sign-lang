@@ -88,8 +88,8 @@ if __name__ == "__main__":
 
     grid_params = {
         "lr": [0.001, 0.0001],
-        "batch_size": [32],
-        "epochs": [1, 10, 15, 20],
+        "batch_size": [32, 64],
+        "epochs": [10, 15, 20],
         "thresholds" : [-1],
         "augment" : [True, False]
     }
