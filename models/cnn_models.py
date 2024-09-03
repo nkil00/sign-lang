@@ -162,3 +162,39 @@ class SingleConvSignLang_4(nn.Module):
         x = F.sigmoid(self.fc4(x))
 
         return x
+
+
+class ConvSignLangNN_4_(nn.Module):
+    def __init__(self, 
+                 first_dim: int, 
+                 second_dim: int, 
+                 third_dim: int, 
+                 fourth_dim: int,
+                 conv1_in: int,
+                 conv2_in: int,
+                 conv3_in: int):
+        super().__init__()
+        self.conv1 = nn.Conv2d(conv1_in, conv2_in, kernel_size=3, )
+        self.pool = nn.MaxPool2d(4, 4)
+        self.conv2 = nn.Conv2d(conv2_in, conv3_in, 3)
+        self.conv3 = nn.Conv2d(conv3_in, 8, 3)
+        self.fc1 = nn.Linear( 8* 6* 6, first_dim)
+        self.fc2 = nn.Linear(first_dim, second_dim)
+        self.fc3 = nn.Linear(second_dim,third_dim)
+        self.fc4 = nn.Linear(third_dim, fourth_dim,)
+    
+    def forward(self, x):
+        #print("", x.shape)
+        x = self.pool(F.relu(self.conv1(x)))
+        # print("After conv1:", x.shape)
+        x = F.relu(self.conv2(x)) # ([32, 8, 29, 29])
+        # print("After conv2:", x.shape)
+        x = self.pool(F.relu(self.conv3(x))) # ([32, 8, 29, 29])
+        # print("After conv3:", x.shape)
+        # fully connected layers 
+        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
+        return x
