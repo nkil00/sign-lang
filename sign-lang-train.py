@@ -79,7 +79,6 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--device", dest="device")
     parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
     args = parser.parse_args()
-    # test
 
     device = "cpu"
     if args.device: device = args.device
