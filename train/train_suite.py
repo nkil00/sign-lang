@@ -55,12 +55,12 @@ class TrainSuite(ABC):
 
 
     @abstractmethod
-    def evaluate(self, vocal=False):
+    def evaluate(self, vocal=False) -> tuple:
         pass
 
 
     @abstractmethod
-    def _gen_data_info(self):
+    def _gen_data_info(self) -> str:
         pass
 
 

@@ -75,7 +75,7 @@ class TrainSignLang(TrainSuite):
             # train on train set
             running_loss_train= 0
             self.model.train()
-            for batch in tqdm(self.train_loader):
+            for batch in self.train_loader:
                 feat, _ = batch
                 feat.to(self.device)
                 loss = train_batch_classification(self.model,
@@ -126,7 +126,7 @@ class TrainSignLang(TrainSuite):
         """
         final_loss = min(self.test_losses)
         correct = 0
-        for b in tqdm(self.test_loader):
+        for b in self.test_loader:
             _, tar = b
             predictions = predict_batch(model=self.model, batch=b, device=self.device)
             tar_num = label_to_int_index(label=list(tar), class_index_dict=self._class_index_dict)
