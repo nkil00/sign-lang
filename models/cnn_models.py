@@ -183,14 +183,9 @@ class ConvSignLangNN_4_(nn.Module):
         self.fc4 = nn.Linear(third_dim, _num_classes,)
     
     def forward(self, x):
-        #print("", x.shape)
-        print("Input Shape:", x.shape)
         x = self.pool(F.relu(self.conv1(x)))
-        print("After conv1:", x.shape)
         x = F.relu(self.conv2(x)) # ([32, 8, 29, 29])
-        print("After conv2:", x.shape)
         x = self.pool(F.relu(self.conv3(x))) # ([32, 8, 29, 29])
-        print("After conv3:", x.shape)
         # fully connected layers 
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
