@@ -30,17 +30,20 @@ def it_info(epoch, bs, lr, th, au):
     print("BatchSize        :", bs)
     print("Learning Rate    :", lr)
     print("Threshold        :", th)
-    print("Data Augmentation: ", au)
+    print("Data Augmentation:", au)
 
-def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: float = 1.0, neurons=None):
+def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: float = 1.0,
+            neurons=None, vocal=False):
+    print(f"-- SAMPLE RATIO: {sample_ratio} --")
+
+
     lrs = grid_params["lr"]
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
     thresholds = grid_params["thresholds"]
     augment = grid_params["augment"]
-    vocal = False
 
-    approx_total_models = len(lrs)*len(batch_size)*len(epochs)*len(thresholds)*len(augment)
+    approx_total_models = len(lrs)*len(batch_size)*len(epochs)*len(thresholds)*len(augment) * 2 
     models_done = 0
     model_names = ["4", "5"]
     for epoch in epochs:
@@ -101,6 +104,8 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-d", "--device", dest="device")
     parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
+    parser.add_argument("-v", "--vocal", dest="vocal", action="store_true")
+
     args = parser.parse_args()
 
     device = "cpu"
@@ -108,6 +113,8 @@ if __name__ == "__main__":
 
     sample_ratio = 1
     if args.sample_ratio: sample_ratio = float(args.sample_ratio)
+
+    vocal = args.vocal
 
     grid_params = {
         "lr":         [0.001, 0.0001],
@@ -126,4 +133,4 @@ if __name__ == "__main__":
                "l4":    [64]
                }
     df = pd.read_csv(LABEL_PATH)
-    grid_lr(grid_params, df, device, sample_ratio, neurons=neurons)
+    grid_lr(grid_params, df, device, sample_ratio, neurons=neurons, vocal=vocal)
