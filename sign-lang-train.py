@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from train.train_sign_lang import TrainSignLang
-from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_
+from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_, ConvSignLangNN_5_
 
 from torch.nn import CrossEntropyLoss
 
@@ -25,54 +25,77 @@ INFO_DIR = os.path.join(current_dir, "eval", "info", "grids")
 
 EPOCHS = 15
 BATCH_SIZE = 32
+def it_info(epoch, bs, lr, th, au):
+    print("Epochs           :", epoch)
+    print("BatchSize        :", bs)
+    print("Learning Rate    :", lr)
+    print("Threshold        :", th)
+    print("Data Augmentation: ", au)
 
-def grid_lr(grid_params: dict, df: pd.DataFrame, device="cpu", sample_ratio=1, neurons=None):
+def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: float = 1.0, neurons=None):
     lrs = grid_params["lr"]
     batch_size = grid_params["batch_size"]
     epochs = grid_params["epochs"]
     thresholds = grid_params["thresholds"]
     augment = grid_params["augment"]
     vocal = False
+
+    approx_total_models = len(lrs)*len(batch_size)*len(epochs)*len(thresholds)*len(augment)
+    models_done = 0
+    model_names = ["4", "5"]
     for epoch in epochs:
         for bs in batch_size:
             for lr in lrs:
                 for th in thresholds:
                     for au in augment:
-                        print("Epochs: ", epoch)
-                        print("BatchSize: ", bs)
-                        print("Learning Rate:", lr)
-                        print("Threshold: ", th)
-                        print("Data Augmentation: ", au)
-                        tsm = TrainSignLang(epochs=epoch,
-                                              lr=lr,
-                                              train_set_size=0.8,
-                                              batch_size=bs,
-                                              device=device)
-                        tsm.init_data(image_dir=IMG_DIR, 
-                                      label_df=df,
-                                      sample_ratio=sample_ratio,
-                                      threshold=th,
-                                      augment_data=au)
+                        for mo in model_names:
+                            # print the current hyperparameters
+                            it_info(epoch, bs, lr, th, au)
 
-                        if neurons == None:
-                            model = ConvSignLangNN_4()
-                        else:
-                            model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
-                                                      conv2_in=neurons["c2_in"][0],
-                                                      conv3_in=neurons["c3_in"][0],
-                                                      first_dim=neurons["l1"][0],
-                                                      second_dim=neurons["l2"][0],
-                                                      third_dim=neurons["l3"][0],
-                                                      fourth_dim=neurons["l4"][0])
-                        lossf = CrossEntropyLoss()
-                        tsm.init_model(model=model,
-                                       loss_fn=lossf,
-                                       optim="Adam")
-                        tsm.train(vocal=vocal)
-                        tsm.evaluate(vocal=vocal)
-                        tsm.save_model(MODEL_DIR)
-                        tsm.save_info(INFO_DIR)
-        
+                            tsm = TrainSignLang(epochs=epoch,
+                                                  lr=lr,
+                                                  train_set_size=0.8,
+                                                  batch_size=bs,
+                                                  device=device)
+                            tsm.init_data(image_dir=IMG_DIR, 
+                                          label_df=df,
+                                          sample_ratio=sample_ratio,
+                                          threshold=th,
+                                          augment_data=au)
+
+                            if neurons == None:
+                                model = ConvSignLangNN_4()
+                            else:
+                                if mo == "5":
+                                    model = ConvSignLangNN_5_(conv1_in=neurons["c1_in"][0],
+                                                              conv2_in=neurons["c2_in"][0],
+                                                              conv3_in=neurons["c3_in"][0],
+                                                              first_dim=neurons["l1"][0],
+                                                              second_dim=neurons["l2"][0],
+                                                              third_dim=neurons["l3"][0],
+                                                              fourth_dim=neurons["l4"][0],
+                                                              )
+                                else: # elif mo == "4":
+                                    model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
+                                                              conv2_in=neurons["c2_in"][0],
+                                                              conv3_in=neurons["c3_in"][0],
+                                                              first_dim=neurons["l1"][0],
+                                                              second_dim=neurons["l2"][0],
+                                                              third_dim=neurons["l3"][0],
+                                                              )
+                            lossf = CrossEntropyLoss()
+                            tsm.init_model(model=model,
+                                           loss_fn=lossf,
+                                           optim="Adam")
+                            tsm.train(vocal=vocal)
+                            tsm.evaluate(vocal=vocal)
+                            tsm.save_model(MODEL_DIR)
+                            tsm.save_info(INFO_DIR)
+
+                            # get overview over how many models have been trained yet
+                            models_done += 1
+                            print(f"> {models_done}/{approx_total_models} done Training! (approx..)")
+            
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -89,9 +112,9 @@ if __name__ == "__main__":
     grid_params = {
         "lr":         [0.001, 0.0001],
         "batch_size": [32],
-        "epochs":     [20, 25],
+        "epochs":     [20],
         "thresholds": [-1],
-        "augment" :   [True, False]
+        "augment" :   [False]
     }
 
     neurons = {"c1_in": [3],
