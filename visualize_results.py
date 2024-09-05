@@ -79,7 +79,8 @@ def main():
     df = pd.read_csv(DATA_PATH)
     _, test_loader = create_data_loaders(label_df=df,
                                         img_dir=IMG_DIR, 
-                                        augment_data=True)
+                                        augment_data=True,
+                                         train_size=0.2)
     unique_labels = get_unique_labels(file_path=DATA_PATH)
     index_class = {idx:label for idx, label in enumerate(unique_labels)}
 

@@ -118,24 +118,31 @@ def plot_accuracy(model: nn.Module, model_name: str, index_class: dict, data_loa
     uactual = [x for sub in actual_labels for x in sub]
     
     uactual_total = {l: 0 for l in labels}
+    correct_preds_dict = {l: 0 for l in labels}
 
     for l in uactual:
         uactual_total[l] += 1
-    
-    correct_preds = {l: 0 for l in labels}
-
     for ac, pr in zip(uactual, upreds):
         if ac == pr:
-            correct_preds[ac] += 1
+            correct_preds_dict[ac] += 1
 
-    accuracy = {l: (correct_preds[l] / uactual_total[l])*100 for l in labels}
-    num_classes = len(accuracy.keys())
+    corr_preds_total = np.sum(np.array(list(correct_preds_dict.values())))
+    act_lbl_total = np.sum(np.array(list(uactual_total.values())))
+
+    cls_accuracy = {l: (correct_preds_dict[l] / uactual_total[l])*100 for l in labels}
+    total_accuracy = corr_preds_total / act_lbl_total * 100
+    num_classes = len(cls_accuracy.keys())
     dcolors = list(colors.keys())[:num_classes]
 
-    plt.bar(range(num_classes), list(accuracy.values()), tick_label=labels, color=dcolors)
-    plt.title(f"Accuracy of model \"{model_name}\" for each class", fontsize=12)
+    plt.figure(figsize=(10, 9))
+    plt.bar(range(num_classes), list(cls_accuracy.values()), tick_label=labels, color=dcolors)
+    plt.title(f"Accuracy of model \"{model_name}\" for each class. Total = {total_accuracy:.3f}%",
+              fontsize=10)
     plt.xlabel("Different Classes")
     plt.ylabel("Accuracy in %")
+    plt.text(0.98, 0.05, """Note that accuracy is higher because we operate on data that has already
+             been seen.""",
+             fontsize=8, ha='right', va='bottom', transform=plt.gcf().transFigure)
 
     # print("Missing return value!")
     return plt 
