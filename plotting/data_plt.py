@@ -89,27 +89,70 @@ def plot_predictions(model: nn.Module, model_name: str, index_class: dict, data_
     fig, ax = plt.subplots(2, 1, figsize=(12, 7))
 
     num_classes = len(ac_labels_cups.keys())
-    # plot data loader distribution
 
     dcolors = list(colors.keys())[:num_classes]
     # plot prediction distribution
     ax[1].bar(range(num_classes), list(pr_labels_cups.values()), tick_label = labels, color=dcolors)
     ax[1].set_title(f"Distribution of Predictions ({model_name})")
 
+    # plot data loader distribution
     ax[0].bar(range(num_classes), list(ac_labels_cups.values()), tick_label = labels, color=dcolors)
     ax[0].set_title(f"Distribution of Elements in DataLoader ({model_name})")
+
     return plt
 
+def plot_accuracy(model: nn.Module, model_name: str, index_class: dict, data_loader: DataLoader, labels: list):
+    """ plots the accuracy of the model considering each individual label """
+    model.eval()
+
+    predictions = []
+    actual_labels = []
+    with torch.no_grad():
+        for feat, tar in data_loader: 
+            out = model(feat).numpy()
+            preds = conv_idx_prediction_to_class(out, index_class)
+            predictions.append(preds)
+            actual_labels.append(list(tar))
+
+    upreds = [x for sub in predictions for x in sub]
+    uactual = [x for sub in actual_labels for x in sub]
+    
+    uactual_total = {l: 0 for l in labels}
+
+    for l in uactual:
+        uactual_total[l] += 1
+    
+    correct_preds = {l: 0 for l in labels}
+
+    for ac, pr in zip(uactual, upreds):
+        if ac == pr:
+            correct_preds[ac] += 1
+
+    accuracy = {l: (correct_preds[l] / uactual_total[l])*100 for l in labels}
+    num_classes = len(accuracy.keys())
+    dcolors = list(colors.keys())[:num_classes]
+
+    plt.bar(range(num_classes), list(accuracy.values()), tick_label=labels, color=dcolors)
+    plt.title(f"Accuracy of model \"{model_name}\" for each class", fontsize=12)
+    plt.xlabel("Different Classes")
+    plt.ylabel("Accuracy in %")
+
+    # print("Missing return value!")
+    return plt 
+    
+
+
+
 def plot_prediction_matrix(pred_mat, labels, model_name):
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(8, 6))
     plt.imshow(pred_mat)
     plt.colorbar()
 
     plt.title(f"Prediction Matrix of ({model_name})")
     plt.xticks(range(len(labels)), labels, size="small")
     plt.yticks(range(len(labels)), labels, size="small")
-    #plt.ylabel("Actual Label")
-    #plt.xlabel("Predicted Label")
+    plt.ylabel("Actual Label")
+    plt.xlabel("Predicted Label")
 
     plt.grid(linewidth=.1)
     return plt

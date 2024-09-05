@@ -52,11 +52,18 @@ def predictions_actual(model: nn.Module,
 
     return upreds, uactual
 
+def _count_labels(labels: list, actual: list) -> dict:
+    """ Count how many of each label is in "actual" """
+    cnt_lbl = {l: 0 for l in labels}
+    for i in actual:
+        cnt_lbl[i] += 1
+
+    return cnt_lbl
+
 def prediction_matrix(predictions: list, 
                       actual: list, 
                       labels: list):
     l = len(labels)
-
     label_idx = {l: idx for idx, l in enumerate(labels)}
     pred_mat = np.zeros((l, l))
 
