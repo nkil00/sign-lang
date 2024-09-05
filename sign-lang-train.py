@@ -45,7 +45,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: f
 
     approx_total_models = len(lrs)*len(batch_size)*len(epochs)*len(thresholds)*len(augment) * 2 
     models_done = 0
-    model_names = ["4", "5"]
+    model_names = ["4"]
     for epoch in epochs:
         for bs in batch_size:
             for lr in lrs:
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     vocal = args.vocal
 
     grid_params = {
-        "lr":         [0.001, 0.0001],
+        "lr":         [0.001],
         "batch_size": [32],
         "epochs":     [20],
         "thresholds": [-1],
@@ -125,9 +125,9 @@ if __name__ == "__main__":
     }
 
     neurons = {"c1_in": [3],
-               "c2_in": [8],
+               "c2_in": [12],
                "c3_in": [16],
-               "l1":    [256],
+               "l1":    [512],
                "l2":    [256],
                "l3":    [128],
                "l4":    [64]
