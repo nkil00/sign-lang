@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from train.train_sign_lang import TrainSignLang
-from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_, ConvSignLangNN_5_
+from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_, ConvSignLangNN_5_, ConvSignLangNN_4_4
 
 from torch.nn import CrossEntropyLoss
 
@@ -79,13 +79,14 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: f
                                                               fourth_dim=neurons["l4"][0],
                                                               )
                                 else: # elif mo == "4":
-                                    model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
-                                                              conv2_in=neurons["c2_in"][0],
-                                                              conv3_in=neurons["c3_in"][0],
-                                                              first_dim=neurons["l1"][0],
-                                                              second_dim=neurons["l2"][0],
-                                                              third_dim=neurons["l3"][0],
-                                                              )
+                                    model = ConvSignLangNN_4_4(conv1_in=neurons["c1_in"][0],
+                                                               conv2_in=neurons["c2_in"][0],
+                                                               conv3_in=neurons["c3_in"][0],
+                                                               conv4_in=neurons["c4_in"][0],
+                                                               first_dim=neurons["l1"][0],
+                                                               second_dim=neurons["l2"][0],
+                                                               third_dim=neurons["l3"][0],
+                                                               )
                             lossf = CrossEntropyLoss()
                             tsm.init_model(model=model,
                                            loss_fn=lossf,
@@ -126,7 +127,7 @@ if __name__ == "__main__":
 
     neurons = {"c1_in": [3],
                "c2_in": [6],
-               "c3_in": [18],
+               "c3_in": [12],
                "c4_in": [18],
                "l1":    [512],
                "l2":    [256],
