@@ -235,3 +235,37 @@ class ConvSignLangNN_5_(nn.Module):
         x = F.relu(self.fc4(x))
         x = self.fc5(x)
         return x
+
+class ConvSignLangNN_4_4(nn.Module):
+    def __init__(self, 
+                 first_dim: int, 
+                 second_dim: int, 
+                 third_dim: int, 
+                 conv1_in: int,
+                 conv2_in: int,
+                 conv3_in: int,
+                 conv4_in: int):
+        super().__init__()
+        self.conv1 = nn.Conv2d(conv1_in, conv2_in, kernel_size=3, )
+        self.pool3 = nn.MaxPool2d(3, 3)
+        self.pool2 = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(conv2_in, conv3_in, 3)
+        self.conv3 = nn.Conv2d(conv3_in, conv4_in, 3)
+        self.conv4 = nn.Conv2d(conv4_in, 24, 3)
+        self.fc1 = nn.Linear(1944, first_dim)
+        self.fc2 = nn.Linear(first_dim, second_dim)
+        self.fc3 = nn.Linear(second_dim,third_dim)
+        self.fc4 = nn.Linear(third_dim, _num_classes,)
+    
+    def forward(self, x):
+        x = self.pool2(F.relu(self.conv1(x)))
+        x = F.relu(self.conv2(x))
+        x = self.pool2(F.relu(self.conv3(x)))
+        x = self.pool3(F.relu(self.conv4(x)))
+        # fully connected layers 
+        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
+        return x
