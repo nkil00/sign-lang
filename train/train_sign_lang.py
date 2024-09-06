@@ -154,15 +154,15 @@ class TrainSignLang(TrainSuite):
         return accuracy, final_loss
 
     def __str__(self):
-        binds = 80
-        sep = "-" * binds + "\n"
-        self_str = "TrainSignLang:\n"
-        epochs = "- Epochs: " + str(self.epochs) + "\n"
-        lr = "- Learning Rate: " + str(self.lr) + "\n"
-        batch = "- Batch Size: " + str(self.batch_size) + "\n"
+        binds          = 80
+        sep            = "-" * binds + "\n"
+        self_str       = "TrainSignLang:\n"
+        epochs         = "- Epochs: " + str(self.epochs) + "\n"
+        lr             = "- Learning Rate: " + str(self.lr) + "\n"
+        batch          = "- Batch Size: " + str(self.batch_size) + "\n"
         train_set_size = "- % Train-Set: " + str(self.train_set_size) + "\n"
-        model = f"model: \n```\n{self.model}\n```\n"
-        opt = f"optimizer:\n ```\n{self.optimizer}\n```\n"
+        model          = f"model: \n```\n{self.model}\n```\n"
+        opt            = f"optimizer:\n ```\n{self.optimizer}\n```\n"
 
         self_str += epochs + lr + train_set_size + batch + sep
         self_str += model + sep
@@ -171,12 +171,12 @@ class TrainSignLang(TrainSuite):
         return self_str
 
     def _gen_data_info(self):
-        binds = 80
-        sep = "-" * binds + "\n"
-        testr = f"- Size Test-Set: {self.len_tel}\n"
-        trstr = f"- Size Train-Set: {self.len_trl}\n"
-        ttstr = f"- Total Size: {len(self._df)}\n"
-        augstr = f"- Data Augmentation: {self.augment_data}"
+        binds  = 80
+        sep    = "-" * binds + "\n"
+        testr  = f"- Size Test-Set: {self.len_tel}\n"
+        trstr  = f"- Size Train-Set: {self.len_trl}\n"
+        ttstr  = f"- Total Size: {len(self._df)}\n"
+        augstr = f"- Data Augmentation: {self.augment_data}\n"
 
         return trstr + testr + ttstr + augstr + sep 
 
