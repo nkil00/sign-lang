@@ -59,8 +59,8 @@ class TrainSignLang(TrainSuite):
             :return: None
         """
         if vocal: 
-            print(f"Starting training.")
-            print(f"Model is on device: {next(self.model.parameters()).device}")
+            print(f"\n> Starting training")
+            print(f"> Model is on device: [{next(self.model.parameters()).device}]")
 
         # setup
         self._class_index_dict = get_class_index_dict(self._df)
@@ -71,6 +71,8 @@ class TrainSignLang(TrainSuite):
         self.train_losses = []
         self.test_losses = []
 
+        patience = 4
+        curr_patience = 0
         for epoch in range(self.epochs):
             # train on train set
             running_loss_train= 0
@@ -106,12 +108,23 @@ class TrainSignLang(TrainSuite):
                     running_loss_test = running_loss_test + (loss * feat.size(0))
 
             epoch_test_loss = running_loss_test / self.len_tel
+
             if epoch_test_loss < min_loss:
                 best_params = self.model.state_dict()
                 min_loss = epoch_test_loss
+
+            # if test loss didn't decrease, increment current patience
+            if (len(self.test_losses) > 0) and (epoch_test_loss >= self.test_losses[-1]):
+                curr_patience += 1
+                if curr_patience >= patience:
+                    print(f"Stopped at epoch {epoch:>2} - Patience of {patience} ")
+                    break
+            # if test loss decreased, set current patience to 0
+            else:
+                curr_patience = 0
             self.test_losses.append(epoch_test_loss)
 
-            if vocal: print(f"Epoch \"{epoch}\" done. | test-loss = {epoch_test_loss:.3f} | train-loss = {epoch_loss_train:.3f}")
+            if vocal: print(f"Epoch \"{(epoch+1):02}\" done. | test-loss = {epoch_test_loss:.3f} | train-loss = {epoch_loss_train:.3f} | Patience: {curr_patience}/{patience} |")
 
         date = datetime.now().strftime("%m%d-%H%M")
         loss = self.test_losses[-1]
@@ -136,7 +149,7 @@ class TrainSignLang(TrainSuite):
         accuracy = correct / self.len_tel
         self.accuracy = accuracy
         self.final_loss = final_loss
-        if vocal: print(f"accuracy = {accuracy}, test-loss={final_loss}")
+        if vocal: print(f"accuracy = {accuracy:.3f}, test-loss={final_loss:.3f}")
 
         return accuracy, final_loss
 
