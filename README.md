@@ -1,6 +1,12 @@
-## Sign Language Image Recognition
+# Sign Language Image Recognition
 
-Best Model so far:
+## Best Performing Model
+TrainSignLang:
+- Epochs: 20
+- Learning Rate: 0.001
+- % Train-Set: 0.8
+- Batch Size: 32
+--------------------------------------------------------------------------------
 TrainSignLang:
 - Epochs: 20
 - Learning Rate: 0.001
@@ -10,18 +16,18 @@ TrainSignLang:
 model: 
 ```
 ConvSignLangNN_4_(
-  (conv1): Conv2d(3, 8, kernel_size=(3, 3), stride=(1, 1))
-  (pool): MaxPool2d(kernel_size=4, stride=4, padding=0, dilation=1, ceil_mode=False)
-  (conv2): Conv2d(8, 16, kernel_size=(3, 3), stride=(1, 1))
-  (conv3): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1))
-  (fc1): Linear(in_features=288, out_features=256, bias=True)
-  (fc2): Linear(in_features=256, out_features=256, bias=True)
+  (conv1): Conv2d(3, 6, kernel_size=(3, 3), stride=(1, 1))
+  (pool): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+  (conv2): Conv2d(6, 18, kernel_size=(3, 3), stride=(1, 1))
+  (conv3): Conv2d(18, 24, kernel_size=(3, 3), stride=(1, 1))
+  (fc1): Linear(in_features=3456, out_features=512, bias=True)
+  (fc2): Linear(in_features=512, out_features=256, bias=True)
   (fc3): Linear(in_features=256, out_features=128, bias=True)
-  (fc4): Linear(in_features=128, out_features=64, bias=True)
+  (fc4): Linear(in_features=128, out_features=36, bias=True)
 )
 ```
 --------------------------------------------------------------------------------
-optimizer:
+Optimizer:
  ```
 Adam (
 Parameter Group 0
@@ -41,7 +47,8 @@ Parameter Group 0
 - Size Train-Set: 7744
 - Size Test-Set: 1936
 - Total Size: 9680
+- Data Augmentation: False
 --------------------------------------------------------------------------------
-- Accuracy: 0.890
-- Loss: 0.316
+- Accuracy: 0.914
+- Loss: 0.291
 --------------------------------------------------------------------------------
