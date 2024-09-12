@@ -284,7 +284,8 @@ class ConvSignLangNN_4_(nn.Module):
         self.conv2 = nn.Conv2d(conv2_in, conv3_in, 3)
         self.conv3 = nn.Conv2d(conv3_in, 24, 3)
         self.pool = nn.MaxPool2d(3, 3)
-        self.dropout = nn.Dropout(p=.2)
+        self.dropout2 = nn.Dropout(p=.3)
+        self.dropout2 = nn.Dropout(p=.2)
         self.fc1 = nn.Linear(3456, first_dim)
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
@@ -297,8 +298,9 @@ class ConvSignLangNN_4_(nn.Module):
         # fully connected layers 
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
+        x = self.dropout1(x)
         x = F.relu(self.fc2(x))
-        x = self.dropout(x)
+        x = self.dropout2(x)
         x = F.relu(self.fc3(x))
         x = self.fc4(x)
         return x
