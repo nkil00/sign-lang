@@ -79,10 +79,10 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: f
                                                               fourth_dim=neurons["l4"][0],
                                                               )
                                 else: # elif mo == "4":
-                                    model = ConvSignLangNN_4_4(conv1_in=neurons["c1_in"][0],
+                                    model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
                                                                conv2_in=neurons["c2_in"][0],
                                                                conv3_in=neurons["c3_in"][0],
-                                                               conv4_in=neurons["c4_in"][0],
+                                                               #conv4_in=neurons["c4_in"][0],
                                                                first_dim=neurons["l1"][0],
                                                                second_dim=neurons["l2"][0],
                                                                third_dim=neurons["l3"][0],
