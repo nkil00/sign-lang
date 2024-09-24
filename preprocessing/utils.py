@@ -12,11 +12,10 @@ _normalization_def = v2.Normalize(mean=[0, 0, 0], std=[1, 1, 1])
 
 def rotate_transform(H, W):
 	return v2.Compose([transforms.Resize((H, W)),
-	                   v2.RandomHorizontalFlip(p=0.5),
-	                   transforms.RandomRotation(30),
-	                   v2.ToDtype(torch.float32, scale=True),
-	                   v2.ConvertImageDtype(dtype=torch.float32),
-	                   _normalization_def
+						v2.RandomHorizontalFlip(p=0.5),
+						transforms.RandomRotation(30),
+						transforms.ToTensor(),
+						_normalization_def
 	                   ])
 
 
