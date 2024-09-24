@@ -85,7 +85,8 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
         aug_datasets.append(aug_ds)
         # rotated images
         aug_ds2 = SignLanguageDataset(annotations=cls_to_augment[c],
-                                      transform=rot_transform)
+                                      transform=rot_transform,
+                                      img_dir=img_dir)
         aug_datasets.append(aug_ds2)
     
     naug_ds = SignLanguageDataset(annotations=df,
