@@ -68,25 +68,15 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: f
 
                             if neurons == None:
                                 model = ConvSignLangNN_4()
-                            else:
-                                if mo == "5":
-                                    model = ConvSignLangNN_5_(conv1_in=neurons["c1_in"][0],
-                                                              conv2_in=neurons["c2_in"][0],
-                                                              conv3_in=neurons["c3_in"][0],
-                                                              first_dim=neurons["l1"][0],
-                                                              second_dim=neurons["l2"][0],
-                                                              third_dim=neurons["l3"][0],
-                                                              fourth_dim=neurons["l4"][0],
-                                                              )
-                                else: # elif mo == "4":
-                                    model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
-                                                               conv2_in=neurons["c2_in"][0],
-                                                               conv3_in=neurons["c3_in"][0],
-                                                               #conv4_in=neurons["c4_in"][0],
-                                                               first_dim=neurons["l1"][0],
-                                                               second_dim=neurons["l2"][0],
-                                                               third_dim=neurons["l3"][0],
-                                                               )
+                            else: # elif mo == "4":
+                                model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
+                                                           conv2_in=neurons["c2_in"][0],
+                                                           conv3_in=neurons["c3_in"][0],
+                                                           #conv4_in=neurons["c4_in"][0],
+                                                           first_dim=neurons["l1"][0],
+                                                           second_dim=neurons["l2"][0],
+                                                           third_dim=neurons["l3"][0],
+                                                           )
                             lossf = CrossEntropyLoss()
                             tsm.init_model(model=model,
                                            loss_fn=lossf,
@@ -122,7 +112,7 @@ if __name__ == "__main__":
         "batch_size": [32],
         "epochs":     [15],
         "thresholds": [-1],
-        "augment" :   [False]
+        "augment" :   [True]
     }
 
     neurons = {"c1_in": [3],
