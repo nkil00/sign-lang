@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from .utils import default_transform, augmented_transform
+from .utils import default_transform, augmented_transform, rotate_transform
 from .utils import filter_by_label
 from .dataset import SignLanguageDataset
 
@@ -75,12 +75,18 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
 
     def_transform = default_transform(IMG_HEIGHT, IMG_HEIGHT)
     aug_transform = augmented_transform(IMG_HEIGHT, IMG_HEIGHT)
+    rot_transform = rotate_transform(IMG_HEIGHT, IMG_HEIGHT)
 
     for c in cls_to_augment.keys():
+        # flip / rotate images
         aug_ds = SignLanguageDataset(annotations=cls_to_augment[c],
                                      transform=aug_transform,
                                      img_dir=img_dir)
         aug_datasets.append(aug_ds)
+        # rotated images
+        aug_ds2 = SignLanguageDataset(annotations=cls_to_augment[c],
+                                      transform=rot_transform)
+        aug_datasets.append(aug_ds2)
     
     naug_ds = SignLanguageDataset(annotations=df,
                                   transform=def_transform,
@@ -106,7 +112,8 @@ def create_data_sets(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_s
 
     def_transform = default_transform(IMG_HEIGHT, IMG_HEIGHT)
     if augment:
-        train_dataset = augment_data(df=train_labels, train_cls_indiv=train_labels_indiv, img_dir=img_dir)
+        print("NOTE: Augmentation Threshold manually set to 1000! (Every sample will be augmented.)")
+        train_dataset = augment_data(df=train_labels, train_cls_indiv=train_labels_indiv, img_dir=img_dir, threshold=1000)
     else:
         train_dataset = SignLanguageDataset(train_labels, transform=def_transform, img_dir=img_dir)
     
