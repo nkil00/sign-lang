@@ -113,6 +113,9 @@ class TrainSignLang(TrainSuite):
                 best_params = self.model.state_dict()
                 min_loss = epoch_test_loss
 
+            # check if we want to reduce the lr
+            self.scheduler.step(epoch_test_loss)
+
             # if test loss didn't decrease, increment current patience
             if (len(self.test_losses) > 0) and (epoch_test_loss >= self.test_losses[-1]):
                 curr_patience += 1

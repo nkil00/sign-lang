@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import pandas as pd
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch.nn as nn
 import torch
 import os
@@ -26,6 +27,7 @@ class TrainSuite(ABC):
         
         if self.optim_str == "Adam":
             self.optimizer = torch.optim.Adam(self.model.parameters(), self.lr)
+            self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', factor=0.5, patience=2)
 
 
     def init_model(self,
