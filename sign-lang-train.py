@@ -111,7 +111,7 @@ if __name__ == "__main__":
         "lr":         [0.001],
         "batch_size": [32],
         "epochs":     [15],
-        "thresholds": [-1],
+        "thresholds": [300],
         "augment" :   [True]
     }
 
