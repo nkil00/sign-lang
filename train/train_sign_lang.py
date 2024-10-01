@@ -37,6 +37,16 @@ class TrainSignLang(TrainSuite):
                   augment_data: bool = True,
                   sample_ratio: float = 1.0,
                   threshold: int = -1):
+        """_
+
+        Args:
+            image_dir (os.PathLike | str): Directory of the image data.
+            label_df (pd.DataFrame): Path to csv file containing image names + labels.
+            augment_data (bool, optional): Chose whether you want to apply data aug. Defaults to True.
+            sample_ratio (float, optional): How much of the dataset you want to use. Defaults to 1.0.
+            threshold (int, optional): If a class exceedes the treshold samples are removed such that 
+                                       the amount of the samples is equal to the treshold. Defaults to -1.
+        """
         if threshold > 0: label_df = balance_labels(label_df,
                                                     threshold=threshold)
         train_loader, test_loader = create_data_loaders(img_dir=image_dir,
@@ -61,6 +71,7 @@ class TrainSignLang(TrainSuite):
         if vocal: 
             print(f"\n> Starting training")
             print(f"> Model is on device: [{next(self.model.parameters()).device}]")
+            print(f"> Total amount of data: {self.len_trl + self.len_tel}")
 
         # setup
         self._class_index_dict = get_class_index_dict(self._df)
