@@ -63,12 +63,12 @@ def main():
 
     if args.dir: model_dir = args.dir
     print(model_dir)
-    model = ConvSignLangNN_4_(first_dim=256,
+    model = ConvSignLangNN_4_(first_dim=512,
                               second_dim=256,
                               third_dim=128,
                               conv1_in=3,
-                              conv2_in=8,
-                              conv3_in=16)
+                              conv2_in=6,
+                              conv3_in=12)    
     try:
         model.load_state_dict(torch.load(model_dir, map_location=torch.device("cpu")))
         model.to("cpu")
