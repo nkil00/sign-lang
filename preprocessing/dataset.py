@@ -1,6 +1,7 @@
-from PIL import Image
-import os
 from torch.utils.data import Dataset
+from PIL import Image
+import numpy as np
+import os
 
 class SignLanguageDataset(Dataset):
 	def __init__(self, annotations, img_dir, transform=None):
@@ -20,4 +21,20 @@ class SignLanguageDataset(Dataset):
 			image = self.transform(image)
 
 		return image, label
+
+class KagSignLanguageDataset(Dataset):
+    def __init__(self, annotations, image_data, transform=None):
+        self.image_data = image_data
+        self.annotations = annotations
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_data)
+
+    def __getitem__(self, idx):
+        image_raw = self.image_data.iloc[idx].reshape(28, 28)
+        image = Image.fromarray(np.uint8(image_raw))
+        label = self.annotations[idx]
+
+        return image, label
 
