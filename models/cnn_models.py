@@ -300,3 +300,27 @@ class ConvSignLangNN_4_(nn.Module):
         x = F.relu(self.fc3(x))
         x = self.fc4(x)
         return x
+
+class ConvSignLangNN_4_KAGG(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 8, 3)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(8, 12, 5)
+        self.fc1 = nn.Linear(192, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 84)
+        self.fc4 = nn.Linear(84, 26)
+    
+    def forward(self, x):
+        # conv
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x))) # ([32, 8, 29, 29])
+        # fc
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
+
+        return x

@@ -3,7 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from .utils import default_transform, augmented_transform, rotate_transform, horizontal_transform
 from .utils import filter_by_label
-from .dataset import SignLanguageDataset
+from .dataset import SignLanguageDataset, KagSignLanguageDataset
 
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
 
@@ -15,9 +15,10 @@ IMAGE_DIR = os.path.join("..", "data", "sign_lang_train")
 LABEL_DIR = os.path.join(IMAGE_DIR, "labels.csv")
 
 IMG_HEIGHT = 128
+KAG_IMG_HEIGHT = 28
 
 ## helper
-def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str | os.PathLike = ""):
+def get_unique_labels(df: pd.DataFrame, col_name="label", file_path: str | os.PathLike = ""):
     if df is None:
         df = pd.read_csv(file_path)
     cls = df[col_name].unique()
@@ -74,7 +75,7 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
     aug_datasets = []
 
     def_transform = default_transform(IMG_HEIGHT, IMG_HEIGHT)
-    aug_transform = augmented_transform(IMG_HEIGHT, IMG_HEIGHT)
+    # aug_transform = augmented_transform(IMG_HEIGHT, IMG_HEIGHT)
     # rot_transform = rotate_transform(IMG_HEIGHT, IMG_HEIGHT)
     hor_transform = horizontal_transform(IMG_HEIGHT, IMG_HEIGHT)
 
@@ -102,7 +103,7 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
 
     return train_dataset
 
-def create_data_sets(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True, sample_ratio: float = 1):
+def create_data_sets_dir(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True, sample_ratio: float = 1):
     unique_labels = get_unique_labels(label_df)
 
     label_df = stratified_sample(label_df, "label", sample_ratio)
@@ -125,6 +126,31 @@ def create_data_sets(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_s
 
     return train_dataset, test_dataset
 
+def create_data_sets_df(df: pd.DataFrame,
+                        train_size: float = 0.8, augment:bool =False):
+
+    transform = default_transform(KAG_IMG_HEIGHT, KAG_IMG_HEIGHT)
+
+    # split 
+    train_df, test_df = train_test_split(df, 
+                                         train_size=train_size,
+                                         stratify=df["label"])
+
+    assert type(train_df) == pd.DataFrame
+    assert type(test_df) == pd.DataFrame
+
+    # sperate label and image data
+    label_train = train_df["label"]
+    imgd_train = train_df.drop("label", axis=1)
+
+    label_test = test_df["label"]
+    imgd_test = test_df.drop("label", axis=1)
+
+    train_ds = KagSignLanguageDataset(annotations=label_train, image_data=imgd_train, transform=transform)
+    test_ds = KagSignLanguageDataset(annotations=label_test, image_data=imgd_test, transform=transform)
+
+    return train_ds, test_ds
+
 def balance_labels(df: pd.DataFrame, threshold: int = 300, label_col: str = "label"):
     df_cpy = df.copy()
     # get labels that are above the threshold
@@ -142,10 +168,21 @@ def balance_labels(df: pd.DataFrame, threshold: int = 300, label_col: str = "lab
     return df_cpy
 
 
-def create_data_loaders(label_df: pd.DataFrame, img_dir: str | os.PathLike, batch_size=32, train_size=0.8, augment_data:bool = True, sample_ratio: float = 1.0):
-    if img_dir == "":  print("Please provide a path for the img files!")
+def create_data_loaders(label_df: pd.DataFrame, img_dir: str | os.PathLike, batch_size=32,
+                        train_size=0.8, augment_data:bool = True, sample_ratio: float = 1.0,
+                        dataset: str = "uibk"):
         
-    train_ds, test_ds = create_data_sets(label_df, img_dir, train_size=train_size, augment=augment_data, sample_ratio=sample_ratio)
+    print(dataset)
+    if dataset == "uibk":
+        if img_dir == "":  print("Please provide a path for the img files!")
+        train_ds, test_ds = create_data_sets_dir(label_df, img_dir, 
+                                                 train_size=train_size, augment=augment_data, 
+                                                 sample_ratio=sample_ratio)
+    elif dataset == "kaggle":
+        train_ds, test_ds = create_data_sets_df(df=label_df, 
+                                                augment=augment_data, train_size=train_size)
+
+
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True, drop_last=True)

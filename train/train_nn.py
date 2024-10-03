@@ -20,25 +20,33 @@ def label_to_int_index(label: str | list, class_index_dict: dict):
 
 # train functions
 def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
-                               class_index, device: str):
+                               class_index, device: str, dataset:str = "uibk"):
     # enable training
     model.train()
     img, tar = batch
 
     img = img.to(device)
 
-    index_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
-    index_of_label = index_of_label.to(device)
+    index_of_label = None
+    if dataset == "uibk":
+        index_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
+        index_of_label = index_of_label.to(device)
 
     # begin training
     optimizer.zero_grad()
     out = model(img)
-    batch_loss = loss_function(out, index_of_label)
+    if dataset == "uibk": 
+        assert (index_of_label is not None)
+        batch_loss = loss_function(out, index_of_label)
+    else: 
+        batch_loss = loss_function(out, tar)
+
     batch_loss.backward()
     optimizer.step()
     
     return batch_loss.item()
 
+# binary classification
 def train_batch_bclsfic(model: nn.Module, batch, optimizer: torch.optim.Optimizer, loss_function,
                                class_index, device: str):
     # enable training
@@ -58,16 +66,23 @@ def train_batch_bclsfic(model: nn.Module, batch, optimizer: torch.optim.Optimize
     
     return batch_loss.item()
 
-def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_index, device):
+def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_index, device, dataset):
     if model.training: model.eval()
     
     feat, tar = batch
+    idx_of_label = None
     feat = feat.to(device)
     out = model(feat)
-    idx_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
-    idx_of_label = idx_of_label.to(device)
 
-    loss = loss_function(out, idx_of_label)
+    if dataset == "uibk":
+        assert (idx_of_label is not None)
+        idx_of_label = torch.tensor(label_to_int_index(list(tar), class_index), dtype=torch.long)
+        idx_of_label = idx_of_label.to(device)
+        loss = loss_function(out, idx_of_label)
+    else:
+        loss = loss_function(out, tar)
+    
+
 
     return loss.item()
 

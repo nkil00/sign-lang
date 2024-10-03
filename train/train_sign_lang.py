@@ -22,13 +22,15 @@ class TrainSignLang(TrainSuite):
                  lr: float = 0.001,
                  batch_size: int = 32,
                  train_set_size: float = 0.8,
-                 device: str = "cpu"
+                 device: str = "cpu",
+                 dataset: str = "uibk"
                  ) -> None:
         super().__init__(epochs=epochs, 
                          lr=lr, 
                          batch_size=batch_size,
                          train_set_size=train_set_size,
                          device=device)
+        self.dataset = dataset
     
 
     def init_data(self, 
@@ -47,14 +49,15 @@ class TrainSignLang(TrainSuite):
             threshold (int, optional): If a class exceedes the treshold samples are removed such that 
                                        the amount of the samples is equal to the treshold. Defaults to -1.
         """
-        if threshold > 0: label_df = balance_labels(label_df,
+        if threshold > 0 and self.dataset == "uibk": label_df = balance_labels(label_df,
                                                     threshold=threshold)
         train_loader, test_loader = create_data_loaders(img_dir=image_dir,
                                                         label_df=label_df, 
                                                         batch_size=self.batch_size, 
                                                         train_size=self.train_set_size, 
                                                         augment_data=augment_data, 
-                                                        sample_ratio=sample_ratio)
+                                                        sample_ratio=sample_ratio,
+                                                        dataset=self.dataset)
         self.augment_data = augment_data
         self._df = label_df
         self.train_loader = train_loader
@@ -91,12 +94,15 @@ class TrainSignLang(TrainSuite):
             for batch in self.train_loader:
                 feat, _ = batch
                 feat.to(self.device)
-                loss = train_batch_classification(self.model,
-                                                  batch,
-                                                  self.optimizer,
-                                                  self.loss_fn,
-                                                  self._class_index_dict, 
-                                                  self.device)
+                loss = train_batch_classification(
+                    self.model,
+                    batch,
+                    self.optimizer,
+                    self.loss_fn,
+                    self._class_index_dict, 
+                    self.device, 
+                    self.dataset
+                )
                 
                 running_loss_train = running_loss_train + (loss * feat.size(0))
 
@@ -111,11 +117,14 @@ class TrainSignLang(TrainSuite):
                 for batch in self.test_loader:
                     feat, _ = batch
                     feat.to(self.device)
-                    loss = evaluate_batch_loss(model=self.model,
-                                   batch=batch, 
-                                   loss_function=self.loss_fn, 
-                                   class_index=self._class_index_dict,
-                                   device=self.device)
+                    loss = evaluate_batch_loss(
+                        model=self.model,
+                        batch=batch, 
+                        loss_function=self.loss_fn, 
+                        class_index=self._class_index_dict,
+                        device=self.device,
+                        dataset=self.dataset
+                    )
                     running_loss_test = running_loss_test + (loss * feat.size(0))
 
             epoch_test_loss = running_loss_test / self.len_tel
@@ -156,9 +165,11 @@ class TrainSignLang(TrainSuite):
         for b in self.test_loader:
             _, tar = b
             predictions = predict_batch(model=self.model, batch=b, device=self.device)
-            tar_num = label_to_int_index(label=list(tar), class_index_dict=self._class_index_dict)
-            correct += np.sum([1 for x, y in zip(predictions, tar_num) if x==y])
-
+            if self.dataset == "uibk":
+                tar_num = label_to_int_index(label=list(tar), class_index_dict=self._class_index_dict)
+                correct += np.sum([1 for x, y in zip(predictions, tar_num) if x==y])
+            elif self.dataset == "kaggle":
+                correct += np.sum([1 for x,y in zip(predictions, tar) if x==y])
 
         accuracy = correct / self.len_tel
         self.accuracy = accuracy

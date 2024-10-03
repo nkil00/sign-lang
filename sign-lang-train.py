@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from train.train_sign_lang import TrainSignLang
-from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_, ConvSignLangNN_5_, ConvSignLangNN_4_4
+from models.cnn_models import ConvSignLangNN_7, ConvSignLangNN_4, ConvSignLangNN_4_, ConvSignLangNN_5_, ConvSignLangNN_4_4, ConvSignLangNN_4_KAGG
 
 from torch.nn import CrossEntropyLoss
 
@@ -32,8 +32,8 @@ def it_info(epoch, bs, lr, th, au):
     print("Threshold        :", th)
     print("Data Augmentation:", au)
 
-def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: float = 1.0,
-            neurons=None, vocal=False):
+def grid_lr(grid_params: dict, label_df: pd.DataFrame, device = "cpu", sample_ratio: float = 1.0,
+            neurons=None, vocal=False, dataset: str = "kaggle"):
     print(f"-- SAMPLE RATIO: {sample_ratio} --")
 
 
@@ -56,17 +56,20 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: f
                             it_info(epoch, bs, lr, th, au)
 
                             tsm = TrainSignLang(epochs=epoch,
-                                                  lr=lr,
-                                                  train_set_size=0.8,
-                                                  batch_size=bs,
-                                                  device=device)
+                                                lr=lr,
+                                                train_set_size=0.8,
+                                                batch_size=bs,
+                                                device=device,
+                                                dataset=dataset)
                             tsm.init_data(image_dir=IMG_DIR, 
-                                          label_df=df,
+                                          label_df=label_df,
                                           sample_ratio=sample_ratio,
                                           threshold=th,
                                           augment_data=au)
 
-                            if neurons == None:
+                            if dataset == "kaggle":
+                                model = ConvSignLangNN_4_KAGG()
+                            elif neurons == None:
                                 model = ConvSignLangNN_4()
                             else: # elif mo == "4":
                                 model = ConvSignLangNN_4_(conv1_in=neurons["c1_in"][0],
@@ -96,6 +99,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--device", dest="device")
     parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
     parser.add_argument("-v", "--vocal", dest="vocal", action="store_true")
+    parser.add_argument("-s", "--dataset", dest="dataset", default="uibk")
 
     args = parser.parse_args()
 
@@ -104,6 +108,8 @@ if __name__ == "__main__":
 
     sample_ratio = 1
     if args.sample_ratio: sample_ratio = float(args.sample_ratio)
+
+    ds = args.dataset
 
     vocal = args.vocal
 
@@ -124,5 +130,16 @@ if __name__ == "__main__":
                "l3":    [128],
                "l4":    [64]
                }
-    df = pd.read_csv(LABEL_PATH)
-    grid_lr(grid_params, df, device, sample_ratio, neurons=neurons, vocal=vocal)
+    label_df = pd.DataFrame()
+    if ds == "uibk":
+        label_df = pd.read_csv(LABEL_PATH)
+    elif ds == "kaggle":
+        label_df = pd.read_csv("./data/kag_sign_lang/sign_mnist_train.csv")
+
+    grid_lr(grid_params=grid_params,
+            label_df=label_df, 
+            device=device, 
+            sample_ratio=sample_ratio, 
+            neurons=neurons, 
+            vocal=vocal,
+            dataset=ds)

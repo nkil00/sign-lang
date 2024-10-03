@@ -1,10 +1,11 @@
 from torch.utils.data import Dataset
 from PIL import Image
+import pandas as pd
 import numpy as np
 import os
 
 class SignLanguageDataset(Dataset):
-	def __init__(self, annotations, img_dir, transform=None):
+	def __init__(self, annotations, img_dir, transform):
 		self.annotations = annotations
 		self.img_dir = img_dir
 		self.transform = transform
@@ -23,7 +24,7 @@ class SignLanguageDataset(Dataset):
 		return image, label
 
 class KagSignLanguageDataset(Dataset):
-    def __init__(self, annotations, image_data, transform=None):
+    def __init__(self, annotations: pd.DataFrame, image_data: pd.DataFrame, transform=None):
         self.image_data = image_data
         self.annotations = annotations
         self.transform = transform
@@ -32,9 +33,11 @@ class KagSignLanguageDataset(Dataset):
         return len(self.image_data)
 
     def __getitem__(self, idx):
-        image_raw = self.image_data.iloc[idx].reshape(28, 28)
+        image_raw = self.image_data.iloc[idx].values.reshape(28, 28)
         image = Image.fromarray(np.uint8(image_raw))
-        label = self.annotations[idx]
+        label = self.annotations.iloc[idx]
+        if self.transform:
+            image = self.transform(image)
 
         return image, label
 

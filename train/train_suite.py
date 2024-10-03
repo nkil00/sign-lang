@@ -45,7 +45,7 @@ class TrainSuite(ABC):
     def init_data(self, 
                   image_dir: os.PathLike | str,
                   label_df: pd.DataFrame,
-                  augment_data: bool = True,
+                  augment_data: bool=True,
                   sample_ratio: float = 1.0,
                   threshold: int = -1):
         pass
