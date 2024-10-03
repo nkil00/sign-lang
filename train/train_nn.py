@@ -26,7 +26,7 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
     img, tar = batch
 
     img = img.to(device)
-    tar.to(device)
+    tar = tar.to(device)
 
     index_of_label = None
     if dataset == "uibk":
@@ -81,7 +81,7 @@ def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_inde
         idx_of_label = idx_of_label.to(device)
         loss = loss_function(out, idx_of_label)
     else:
-        tar.to(device)
+        tar = tar.to(device)
         loss = loss_function(out, tar)
     
 
