@@ -40,6 +40,7 @@ def train_batch_classification(model: nn.Module, batch, optimizer: torch.optim.O
         assert (index_of_label is not None)
         batch_loss = loss_function(out, index_of_label)
     else: 
+        print("Target on device:", tar.device)
         batch_loss = loss_function(out, tar)
 
     batch_loss.backward()
