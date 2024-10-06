@@ -17,13 +17,14 @@ SAMPLE_RATIO = 1
 IN_FEATS = 128
 OUT_FEATS = 36
 IN_CHANNEL = 3
+BATCH_SIZE = 32
 
 def objective(trial: optuna.Trial):
     print(DEVICE, VOCAL, SAMPLE_RATIO)
     suite = TrainSignLang( 
         epochs = trial.suggest_int("epochs", 5, 20),
         lr = 0.001,
-        batch_size = 32,
+        batch_size = BATCH_SIZE,
         device = DEVICE,
 
     )
@@ -56,12 +57,13 @@ def objective(trial: optuna.Trial):
     return suite.train_loop(vocal=VOCAL)
 
 def main():
-    global DEVICE, SAMPLE_RATIO, VOCAL
+    global DEVICE, SAMPLE_RATIO, VOCAL, BATCH_SIZE
     parser = ArgumentParser()
     parser.add_argument("-d", "--device", dest="device")
     parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
     parser.add_argument("-v", "--vocal", dest="vocal", action="store_true")
     parser.add_argument("-t", "--n_trials", dest="n_trials", default=100)
+    parser.add_argument("-b", "--batch_size", dest="n_trials", default=32)
 
     args = parser.parse_args()
 
@@ -72,6 +74,7 @@ def main():
     if args.sample_ratio: SAMPLE_RATIO = float(args.sample_ratio)
 
     VOCAL = args.vocal
+    BATCH_SIZE = int(args.batch_size)
 
     n_trials = int(args.n_trials)
 
