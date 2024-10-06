@@ -63,7 +63,7 @@ def main():
     parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
     parser.add_argument("-v", "--vocal", dest="vocal", action="store_true")
     parser.add_argument("-t", "--n_trials", dest="n_trials", default=100)
-    parser.add_argument("-b", "--batch_size", dest="n_trials", default=32)
+    parser.add_argument("-b", "--batch_size", dest="batch_size", default=32)
 
     args = parser.parse_args()
 
