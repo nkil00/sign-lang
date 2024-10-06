@@ -135,6 +135,7 @@ if __name__ == "__main__":
         label_df = pd.read_csv(LABEL_PATH)
     elif ds == "kaggle":
         label_df = pd.read_csv("./data/kag_sign_lang/sign_mnist_train.csv")
+        label_df.loc[label_df["label"] > 8, "label"] -= 1       # label_df = label_df["label"] - 1
 
     grid_lr(grid_params=grid_params,
             label_df=label_df, 
