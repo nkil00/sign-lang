@@ -79,11 +79,12 @@ class TrainSignLang(TrainSuite):
 
         patience = 4
         curr_patience = 0
-        for epoch in range(self.epochs):
+        epochs = self.epochs
+        for epoch in range(epochs):
             # train on train set
             running_loss_train= 0
             self.model.train()
-            for batch in self.train_loader:
+            for batch in (tqdm(self.train_loader) if vocal else self.train_loader):
                 feat, _ = batch
                 feat.to(self.device)
                 loss = train_batch_classification(self.model,
