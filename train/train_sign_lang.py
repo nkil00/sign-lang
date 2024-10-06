@@ -62,6 +62,88 @@ class TrainSignLang(TrainSuite):
         self.test_loader = test_loader
         self.len_tel = len(test_loader.dataset)
 
+    def train_loop(self, vocal):
+        if vocal: 
+            print(f"\n> Starting training")
+            print(f"> Model is on device: [{next(self.model.parameters()).device}]")
+            print(f"> Total amount of data: {self.len_trl + self.len_tel}")
+
+        # setup
+        self._class_index_dict = get_class_index_dict(self._df)
+        best_params = self.model.state_dict()
+        min_loss = float("inf")
+
+        # training
+        self.train_losses = []
+        self.test_losses = []
+
+        patience = 4
+        curr_patience = 0
+        for epoch in range(self.epochs):
+            # train on train set
+            running_loss_train= 0
+            self.model.train()
+            for batch in self.train_loader:
+                feat, _ = batch
+                feat.to(self.device)
+                loss = train_batch_classification(self.model,
+                                                  batch,
+                                                  self.optimizer,
+                                                  self.loss_fn,
+                                                  self._class_index_dict, 
+                                                  self.device)
+                
+                running_loss_train = running_loss_train + (loss * feat.size(0))
+
+            epoch_loss_train = running_loss_train / self.len_trl 
+            self.train_losses.append(epoch_loss_train)
+                
+            # get test set loss
+            self.model.eval()
+            running_loss_test = 0
+
+            with torch.no_grad():
+                for batch in self.test_loader:
+                    feat, _ = batch
+                    feat.to(self.device)
+                    loss = evaluate_batch_loss(model=self.model,
+                                   batch=batch, 
+                                   loss_function=self.loss_fn, 
+                                   class_index=self._class_index_dict,
+                                   device=self.device)
+                    running_loss_test = running_loss_test + (loss * feat.size(0))
+
+            epoch_test_loss = running_loss_test / self.len_tel
+
+            if epoch_test_loss < min_loss:
+                best_params = self.model.state_dict()
+                min_loss = epoch_test_loss
+
+            # check if we want to reduce the lr
+            self.scheduler.step(epoch_test_loss)
+
+            # if test loss didn't decrease, increment current patience
+            if (len(self.test_losses) > 0) and (epoch_test_loss >= self.test_losses[-1]):
+                curr_patience += 1
+                if curr_patience >= patience:
+                    print(f"Stopped at epoch {epoch:>2} - Patience of {patience} ")
+                    break
+            # if test loss decreased, set current patience to 0
+            else:
+                curr_patience = 0
+            self.test_losses.append(epoch_test_loss)
+
+            if vocal: print(f"Epoch \"{(epoch+1):02}\" done. | test-loss = {epoch_test_loss:.3f} | train-loss = {epoch_loss_train:.3f} | Patience: {curr_patience}/{patience} |")
+
+        return min_loss
+        
+        
+        
+        
+
+
+
+
     def train(self, vocal=False):
         """
         Trains the network in the train set. Keeps track of the test and train losses over the epochs.

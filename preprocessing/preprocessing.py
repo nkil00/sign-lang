@@ -102,7 +102,13 @@ def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.Path
 
     return train_dataset
 
-def create_data_sets(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_size:float=0.8, label_col_name:str="label", random_state:int=None, augment: bool=True, sample_ratio: float = 1):
+def create_data_sets(label_df: pd.DataFrame,
+                     img_dir: str | os.PathLike,
+                     train_size:float=0.8,
+                     label_col_name:str="label",
+                     random_state:int | None=None,
+                     augment: bool=True,
+                     sample_ratio: float = 1):
     unique_labels = get_unique_labels(label_df)
 
     label_df = stratified_sample(label_df, "label", sample_ratio)
@@ -117,7 +123,10 @@ def create_data_sets(label_df: pd.DataFrame, img_dir: str | os.PathLike, train_s
     def_transform = default_transform(IMG_HEIGHT, IMG_HEIGHT)
     if augment:
         print("NOTE: Augmentation Threshold manually set to 1000! (Every class will be augmented.)")
-        train_dataset = augment_data(df=train_labels, train_cls_indiv=train_labels_indiv, img_dir=img_dir, threshold=1000)
+        train_dataset = augment_data(df=train_labels, 
+                                     train_cls_indiv=train_labels_indiv, 
+                                     img_dir=img_dir, 
+                                     threshold=1000)
     else:
         train_dataset = SignLanguageDataset(train_labels, transform=def_transform, img_dir=img_dir)
     
