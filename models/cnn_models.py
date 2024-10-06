@@ -2,7 +2,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-_num_classes = 36
+_num_classes_uibk = 36
+_num_classes_kagg = 24
 
 class ConvSignLangNN(nn.Module):
     def __init__(self):
@@ -13,7 +14,7 @@ class ConvSignLangNN(nn.Module):
         self.fc1 = nn.Linear(8*29*29, 256)
         self.fc2 = nn.Linear(256, 120)
         self.fc3 = nn.Linear(120, 84)
-        self.fc4 = nn.Linear(84, _num_classes)
+        self.fc4 = nn.Linear(84, _num_classes_uibk)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -39,7 +40,7 @@ class ConvSignLangNN_7(nn.Module):
         self.fc3 = nn.Linear(256, 128)
         self.fc4 = nn.Linear(128, 128)
         self.fc5 = nn.Linear(128, 84)
-        self.fc6 = nn.Linear(84, _num_classes)
+        self.fc6 = nn.Linear(84, _num_classes_uibk)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -67,7 +68,7 @@ class ConvSignLangNN_6(nn.Module):
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 128)
         self.fc4 = nn.Linear(128, 84)
-        self.fc5 = nn.Linear(84, _num_classes)
+        self.fc5 = nn.Linear(84, _num_classes_uibk)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -100,7 +101,7 @@ class ConvSignLangNN_7_(nn.Module):
         self.fc3 = nn.Linear(second_dim,third_dim)
         self.fc4 = nn.Linear(third_dim, fourth_dim,)
         self.fc5 = nn.Linear(fourth_dim, fifth_dim)
-        self.fc6 = nn.Linear(fifth_dim, _num_classes)
+        self.fc6 = nn.Linear(fifth_dim, _num_classes_uibk)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -125,7 +126,7 @@ class ConvSignLangNN_4(nn.Module):
         self.fc1 = nn.Linear(8*29*29, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 84)
-        self.fc4 = nn.Linear(84, _num_classes)
+        self.fc4 = nn.Linear(84, _num_classes_uibk)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -180,7 +181,7 @@ class ConvSignLangNN_4_(nn.Module):
         self.fc1 = nn.Linear(3456, first_dim)
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
-        self.fc4 = nn.Linear(third_dim, _num_classes,)
+        self.fc4 = nn.Linear(third_dim, _num_classes_uibk,)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -221,7 +222,7 @@ class ConvSignLangNN_5_(nn.Module):
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
         self.fc4 = nn.Linear(third_dim, fourth_dim)
-        self.fc5 = nn.Linear(fourth_dim, _num_classes)
+        self.fc5 = nn.Linear(fourth_dim, _num_classes_uibk)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -255,7 +256,7 @@ class ConvSignLangNN_4_4(nn.Module):
         self.fc1 = nn.Linear(1944, first_dim)
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
-        self.fc4 = nn.Linear(third_dim, _num_classes,)
+        self.fc4 = nn.Linear(third_dim, _num_classes_uibk,)
     
     def forward(self, x):
         x = self.pool2(F.relu(self.conv1(x)))
@@ -287,7 +288,7 @@ class ConvSignLangNN_4_(nn.Module):
         self.fc1 = nn.Linear(3456, first_dim)
         self.fc2 = nn.Linear(first_dim, second_dim)
         self.fc3 = nn.Linear(second_dim,third_dim)
-        self.fc4 = nn.Linear(third_dim, _num_classes,)
+        self.fc4 = nn.Linear(third_dim, _num_classes_uibk,)
     
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -310,7 +311,7 @@ class ConvSignLangNN_4_KAGG(nn.Module):
         self.fc1 = nn.Linear(1452, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 84)
-        self.fc4 = nn.Linear(84, 26)
+        self.fc4 = nn.Linear(84, _num_classes_kagg)
     
     def forward(self, x):
         # conv
