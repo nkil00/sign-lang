@@ -81,7 +81,7 @@ class SignLangCNN(nn.Module):
             in_features = hidden_size
 
         layers.append(nn.Linear(hidden_size, out_features))
-        layers.append(nn.Softmax(dim=1))
+        # layers.append(nn.Softmax(dim=1))
 
         self.model = nn.Sequential(*layers)
 
