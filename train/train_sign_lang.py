@@ -78,6 +78,7 @@ class TrainSignLang(TrainSuite):
 
         # setup
         self._class_index_dict = get_class_index_dict(self._df)
+        print(self._class_index_dict.keys())
         best_params = self.model.state_dict()
         min_loss = float("inf")
 

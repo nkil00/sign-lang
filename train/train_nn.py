@@ -101,6 +101,15 @@ def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
 
     return preds_max
 
+def predict_single(model: torch.nn.Module, sample: torch.Tensor, device):
+    with torch.no_grad():
+        preds_raw = model(sample)
+
+    preds_np = preds_raw.detach().cpu().numpy()
+    pred_am = np.argmax(preds_np, axis=1)
+
+    return pred_am
+
 
 def predict_batch_binary(model: torch.nn.Module, batch, device) -> np.ndarray:
     """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """

@@ -116,7 +116,7 @@ if __name__ == "__main__":
     grid_params = {
         "lr":         [0.001],
         "batch_size": [32],
-        "epochs":     [15],
+        "epochs":     [30],
         "thresholds": [300],
         "augment" :   [True]
     }
