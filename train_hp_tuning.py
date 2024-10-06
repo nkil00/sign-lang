@@ -23,7 +23,7 @@ def objective(trial: optuna.Trial):
     suite = TrainSignLang( 
         epochs = trial.suggest_int("epochs", 5, 20),
         lr = 0.001,
-        batch_size = 64,
+        batch_size = 32,
         device = DEVICE,
 
     )
