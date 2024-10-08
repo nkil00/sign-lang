@@ -6,6 +6,7 @@ import torch.nn as nn
 
 from argparse import ArgumentParser
 from train.train_sign_lang import TrainSignLang
+from train.train_nn import get_class_weights
 from models.dynamic_model import SignLangCNN
 
 import pandas as pd
@@ -20,10 +21,9 @@ IN_CHANNEL = 3
 BATCH_SIZE = 32
 
 def objective(trial: optuna.Trial):
-    print(DEVICE, VOCAL, SAMPLE_RATIO)
     suite = TrainSignLang( 
-        epochs = trial.suggest_int("epochs", 5, 20),
-        lr = 0.001,
+        epochs = trial.suggest_int("epochs", 12, 40),
+        lr = trial.suggest_float("lr", 0.00075, 0.001),
         batch_size = BATCH_SIZE,
         device = DEVICE,
 
@@ -37,16 +37,20 @@ def objective(trial: optuna.Trial):
     )
     # define model
     model = SignLangCNN(
-        n_flayers=trial.suggest_int("n_flayers", 1, 4),
-        n_clayers=trial.suggest_int("n_clayers", 1, 3),
-        hidden_size=trial.suggest_int("hidden_size", 32, 512),
+        n_flayers=trial.suggest_int("n_flayers", 2, 4),
+        n_clayers=trial.suggest_int("n_clayers", 2, 3),
+        hidden_size=trial.suggest_int("hidden_size", 64, 512, step=32),
         in_channels=IN_CHANNEL,
         in_features=IN_FEATS,
         out_features=OUT_FEATS,
+        trial=trial
     )
 
     # loss function
-    lf = torch.nn.CrossEntropyLoss()
+    cel_weights_dict = get_class_weights(suite._df)
+    cel_weights = torch.tensor(list(cel_weights_dict.values()), dtype=torch.float32)
+
+    lf = torch.nn.CrossEntropyLoss(weight=cel_weights)
 
     suite.init_model(
         model = model,
@@ -54,10 +58,9 @@ def objective(trial: optuna.Trial):
         loss_fn=lf
     )
 
-    return suite.train_loop(vocal=VOCAL)
+    return suite.train_loop(vocal=VOCAL, trial=trial)
 
-def main():
-    global DEVICE, SAMPLE_RATIO, VOCAL, BATCH_SIZE
+def read_args():
     parser = ArgumentParser()
     parser.add_argument("-d", "--device", dest="device")
     parser.add_argument("-r", "--sample_ratio", dest="sample_ratio")
@@ -67,6 +70,13 @@ def main():
 
     args = parser.parse_args()
 
+    return args
+
+def main():
+    global DEVICE, SAMPLE_RATIO, VOCAL, BATCH_SIZE
+
+    # read in commandline arguments
+    args = read_args()
     DEVICE = "cpu"
     if args.device: DEVICE = args.device
 
@@ -78,7 +88,7 @@ def main():
 
     n_trials = int(args.n_trials)
 
-
+    # create and start study
     study = optuna.create_study(direction="minimize") # minimize the test-loss
     study.optimize(objective, n_trials=n_trials)
 

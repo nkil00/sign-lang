@@ -1,14 +1,15 @@
 import torch.nn as nn
+import optuna
 import numpy as np
 import torch
+import time
 
 
 """ Feed Forward Neural Network """
 class SignLangNN(nn.Module):
     def __init__(self, 
                  n_flayers: int, 
-                 in_features: int,
-                 hidden_size: int,
+                 in_features: int, hidden_size: int,
                  out_features: int
                  ) -> None:
         super().__init__()
@@ -48,34 +49,49 @@ class SignLangCNN(nn.Module):
                  in_channels: int,
                  hidden_size: int,
                  in_features: int,
-                 out_features: int
+                 out_features: int,
+                 trial: optuna.Trial, 
                  ) -> None:
         super().__init__()
         layers = []
 
-        out_channels = 4
         in_size = in_features
         for i in range(n_clayers):
-            layers.append(nn.Conv2d(in_channels=in_channels,
-                                    out_channels=out_channels,
-                                    kernel_size=3))
-            layers.append(nn.ReLU())
-            if (i % 2) == 0:
-                layers.append(nn.MaxPool2d(kernel_size=3, stride=3))
+            # suggest params
+            out_channels = trial.suggest_int(f"out_channels_{i}", 4, 12, step=2)
+            kernel_size_mp = trial.suggest_int(f"kernel_size_{i}", 3, 4)
+            kernel_size = 3
 
+            # add layers
+            layers.append(nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size))
+            layers.append(nn.ReLU())
+
+            add_maxpool = trial.suggest_categorical(f"add_maxpool_{i}", [True, False])
+            if add_maxpool and not (i==n_clayers-1): 
+                layers.append(nn.MaxPool2d(kernel_size=kernel_size_mp, stride=3))
+            # always pool the last layer
+            elif i == (n_clayers-1): 
+                layers.append(nn.MaxPool2d(kernel_size=kernel_size, stride=3))
+
+            # calculate size
+            s_out = compute_size_out_conv2d(input_size=in_size, kernel_size=kernel_size) # size_out 
+            if add_maxpool or (i==(n_clayers-1)): s_out = compute_size_out_maxpool2d(input_size=s_out, kernel_size=kernel_size_mp, stride=3)   
+
+            in_size = s_out
             in_channels = out_channels
 
-            # calculate dim's
-            s_out = compute_size_out_conv2d(input_size=in_size, kernel_size=3) # size_out 
-            if (i % 2) == 0:
-                s_out = compute_size_out_maxpool2d(input_size=s_out, kernel_size=3, stride=3)   
-            in_size = s_out
 
+        in_features = int((in_size ** 2) * in_channels) # use in_channels, since its eq to out_channels + remove warning
 
-        in_features = int((in_size * in_size) * out_channels)
+        print("In Features:", in_features)
 
         layers.append(nn.Flatten(start_dim=1)) # Flatten after batch
-        for _ in range(n_flayers):
+        for i in range(n_flayers):
+            # add 1 dropout layer
+            if i == 1: 
+                dropout_rate = trial.suggest_float("fc_dropout_{}".format(i), 0.2, 0.5)
+                layers.append(nn.Dropout(p=dropout_rate))
+
             layers.append(nn.Linear(in_features, hidden_size))
             layers.append(nn.ReLU())
             in_features = hidden_size
@@ -88,15 +104,31 @@ class SignLangCNN(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-
-if __name__ == "__main__":
+def objective(trial):
     model = SignLangCNN(n_flayers=3,
-                        n_clayers=1,
+                        n_clayers=3,
                         in_channels=3,
                         hidden_size=16,
                         in_features=128,
-                        out_features=12)
+                        out_features=12,
+                        trial=trial)
 
+    print("Model:\n", model)
     in_tensor = torch.randn(1, 3, 128, 128)
     out = model(in_tensor)
+    return 0.1
+
+if __name__ == "__main__":
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=1)
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print("  Value: ", trial.value)
+
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
+
 
