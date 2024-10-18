@@ -49,7 +49,7 @@ def objective(trial: optuna.Trial):
 
     # loss function
     cel_weights_dict = get_class_weights(suite._df)
-    cel_weights = torch.tensor(list(cel_weights_dict.values()), dtype=torch.float32)
+    cel_weights = torch.tensor(list(cel_weights_dict.values()), dtype=torch.float32).to(DEVICE)
 
     lf = torch.nn.CrossEntropyLoss(weight=cel_weights)
 
