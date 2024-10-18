@@ -66,6 +66,13 @@ def data_distribution(df: pd.DataFrame) -> dict:
     return cls_cups
 
 def augment_data(df: pd.DataFrame, train_cls_indiv: dict, img_dir: str | os.PathLike,threshold: int=300) -> Dataset:
+    """ Performs various (!) data augmentation on the data.
+
+        params:
+            threshold (int): If the number of samples of a class are below the _threshold_ the augmentation will be applied to that class
+
+        returns: The Dataset containing the original + augmented samples 
+    """
     # 
     cls_cups = data_distribution(df)
 

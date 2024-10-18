@@ -5,6 +5,7 @@ import torch.nn as nn
 from tqdm import tqdm
 
 from datetime import datetime
+import optuna
 
 import pandas as pd
 from train.train_suite import TrainSuite
@@ -62,11 +63,12 @@ class TrainSignLang(TrainSuite):
         self.test_loader = test_loader
         self.len_tel = len(test_loader.dataset)
 
-    def train_loop(self, vocal):
+    def train_loop(self, vocal, trial):
         if vocal: 
             print(f"\n> Starting training")
             print(f"> Model is on device: [{next(self.model.parameters()).device}]")
             print(f"> Total amount of data: {self.len_trl + self.len_tel}")
+            print(f"Model:\n{self.model}")
 
         # setup
         self._class_index_dict = get_class_index_dict(self._df)
@@ -133,6 +135,11 @@ class TrainSignLang(TrainSuite):
             else:
                 curr_patience = 0
             self.test_losses.append(epoch_test_loss)
+
+            trial.report(epoch_test_loss, epoch)
+
+            if trial.should_prune():
+                raise optuna.exceptions.TrialPruned() 
 
             if vocal: print(f"Epoch \"{(epoch+1):02}\" done. | test-loss = {epoch_test_loss:.3f} | train-loss = {epoch_loss_train:.3f} | Patience: {curr_patience}/{patience} |")
 

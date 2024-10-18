@@ -1,6 +1,8 @@
+from typing import Dict
 from torch import nn
 import torch
 import numpy as np
+import pandas as pd
 
 from torch import Tensor
 
@@ -70,6 +72,17 @@ def evaluate_batch_loss(model: torch.nn.Module, batch, loss_function, class_inde
     loss = loss_function(out, idx_of_label)
 
     return loss.item()
+
+def get_class_weights(df: pd.DataFrame) -> Dict[str, np.ndarray]:
+    """ Returns the weights for classes based of their quantity in the dataset. (e.g. For torch.CrossEntropyLoss())"""
+    labels = df["label"].unique()
+
+    quant_per_label = {l: (len(df[df["label"]==l])) for l in labels}
+
+    cum_quant = np.sum(np.array(list(quant_per_label.values())))
+    inv_perc_per_label = {l: 1 - (v/cum_quant) for l, v in zip(quant_per_label.keys(), quant_per_label.values())}
+
+    return inv_perc_per_label
 
 def predict_batch(model: torch.nn.Module, batch, device) -> np.ndarray:
     """ Returns the predicted numerical labels of the batch. Sets the model to evaluation mode. """

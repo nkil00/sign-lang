@@ -22,7 +22,7 @@ BATCH_SIZE = 32
 
 def objective(trial: optuna.Trial):
     suite = TrainSignLang( 
-        epochs = trial.suggest_int("epochs", 12, 40),
+        epochs = trial.suggest_int("epochs", 4, 5),
         lr = trial.suggest_float("lr", 0.00075, 0.001),
         batch_size = BATCH_SIZE,
         device = DEVICE,
@@ -34,6 +34,7 @@ def objective(trial: optuna.Trial):
         image_dir="./data/sign_lang_train",
         label_df=df,
         sample_ratio=SAMPLE_RATIO,
+        threshold=300
     )
     # define model
     model = SignLangCNN(

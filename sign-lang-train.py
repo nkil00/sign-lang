@@ -77,6 +77,7 @@ def grid_lr(grid_params: dict, df: pd.DataFrame, device = "cpu", sample_ratio: f
                                                            second_dim=neurons["l2"][0],
                                                            third_dim=neurons["l3"][0],
                                                            )
+                            # TODO: Add weighted loss function
                             lossf = CrossEntropyLoss()
                             tsm.init_model(model=model,
                                            loss_fn=lossf,
