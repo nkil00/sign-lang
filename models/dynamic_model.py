@@ -33,9 +33,9 @@ class SignLangNN(nn.Module):
 def compute_size_out_conv2d(input_size: int, kernel_size: int, stride: int = 1, dilation: int = 1, padding: int = 0, ceil_mode: bool = False):
     raw_res = ((input_size + 2 * padding - dilation * (kernel_size - 1) - 1) / (stride)) + 1
     if ceil_mode:
-        return np.ceil(raw_res)
+        return int(np.ceil(raw_res))
     else:
-        return np.floor(raw_res)
+        return int(np.floor(raw_res))
 
 def compute_size_out_maxpool2d(input_size: int, kernel_size: int, stride: int | None = None, dilation: int = 1, padding: int = 0, ceil_mode: bool = False):
     if stride is None:
@@ -67,15 +67,16 @@ class SignLangCNN(nn.Module):
             layers.append(nn.ReLU())
 
             add_maxpool = trial.suggest_categorical(f"add_maxpool_{i}", [True, False])
-            if add_maxpool and not (i==n_clayers-1): 
+            if add_maxpool and not (i==(n_clayers-1)): 
                 layers.append(nn.MaxPool2d(kernel_size=kernel_size_mp, stride=3))
             # always pool the last layer
             elif i == (n_clayers-1): 
-                layers.append(nn.MaxPool2d(kernel_size=kernel_size, stride=3))
+                layers.append(nn.MaxPool2d(kernel_size=kernel_size_mp, stride=3))
 
             # calculate size
             s_out = compute_size_out_conv2d(input_size=in_size, kernel_size=kernel_size) # size_out 
-            if add_maxpool or (i==(n_clayers-1)): s_out = compute_size_out_maxpool2d(input_size=s_out, kernel_size=kernel_size_mp, stride=3)   
+            if add_maxpool or (i==(n_clayers-1)): 
+                s_out = compute_size_out_maxpool2d(input_size=s_out, kernel_size=kernel_size_mp, stride=3)   
 
             in_size = s_out
             in_channels = out_channels
@@ -119,16 +120,22 @@ def objective(trial):
     return 0.1
 
 if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=1)
-
-    print("Best trial:")
-    trial = study.best_trial
-
-    print("  Value: ", trial.value)
-
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
+#    study = optuna.create_study(direction="maximize")
+#    study.optimize(objective, n_trials=1)
+#
+#    print("Best trial:")
+#    trial = study.best_trial
+#
+#    print("  Value: ", trial.value)
+#
+#    print("  Params: ")
+#    for key, value in trial.params.items():
+#        print("    {}: {}".format(key, value))
+    N = 128
+    sout = compute_size_out_conv2d(N,kernel_size=3)
+    sout = compute_size_out_maxpool2d(sout, kernel_size=4, stride=3)
+    sout = compute_size_out_conv2d(sout,kernel_size=3)
+    sout = compute_size_out_maxpool2d(sout, kernel_size=3, stride=3)
+    print(sout**2 * 12)
 
 
