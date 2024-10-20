@@ -30,8 +30,7 @@ def objective(trial: optuna.Trial):
     )
     df = pd.read_csv("./data/sign_lang_train/labels.csv")
 
-    suite.init_data(
-        image_dir="./data/sign_lang_train",
+    suite.init_data( image_dir="./data/sign_lang_train",
         label_df=df,
         sample_ratio=SAMPLE_RATIO,
         threshold=300
@@ -39,7 +38,7 @@ def objective(trial: optuna.Trial):
     # define model
     model = SignLangCNN(
         n_flayers=trial.suggest_int("n_flayers", 2, 4),
-        n_clayers=trial.suggest_int("n_clayers", 2, 3),
+        n_clayers=trial.suggest_int("n_clayers", 3, 3),
         hidden_size=trial.suggest_int("hidden_size", 64, 512, step=32),
         in_channels=IN_CHANNEL,
         in_features=IN_FEATS,
@@ -99,6 +98,17 @@ def main():
     print("  Number of finished trials: ", len(study.trials))
     print("  Number of pruned trials: ", len(pruned_trials))
     print("  Number of complete trials: ", len(complete_trials))
+
+    print("\nBest Trial:")
+    best_trial = study.best_trial
+    print(f"{best_trial}")
+
+
+    print("  Value: ", best_trial.value)
+
+    print("  Params: ")
+    for key, value in best_trial.params.items():
+        print("    {}: {}".format(key, value))
 
 if __name__ == "__main__":
     main()
