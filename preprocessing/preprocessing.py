@@ -17,7 +17,7 @@ LABEL_DIR = os.path.join(IMAGE_DIR, "labels.csv")
 IMG_HEIGHT = 128
 
 ## helper
-def get_unique_labels(df: pd.DataFrame = None, col_name="label", file_path: str | os.PathLike = ""):
+def get_unique_labels(df: pd.DataFrame | None = None, col_name="label", file_path: str | os.PathLike = ""):
     if df is None:
         df = pd.read_csv(file_path)
     cls = df[col_name].unique()

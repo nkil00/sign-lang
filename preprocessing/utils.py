@@ -52,9 +52,10 @@ def default_transform(H, W):
 
 
 def filter_by_label(label: str, dataframe: pd.DataFrame, col_name: str = "label"):
-	# copy df
-	df = dataframe.copy(deep=True)
-	return df[df[col_name] == label]
+    """ Returns a dataframe that only contains rows with the specified _label_ """
+    # copy df
+    df = dataframe.copy(deep=True)
+    return df[df[col_name] == label]
 
 def generate_info(epochs, batch_size, train_size, test_size, lr, model, optimizer, binds=80) -> str:
     sep = "-"*binds + "\n"
