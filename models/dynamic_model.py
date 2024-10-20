@@ -59,14 +59,14 @@ class SignLangCNN(nn.Module):
         for i in range(n_clayers):
             # suggest params
             out_channels = trial.suggest_int(f"out_channels_{i}", 4, 12, step=2)
-            kernel_size_mp = trial.suggest_int(f"kernel_size_{i}", 3, 4)
-            kernel_size = 3
+            kernel_size_mp = trial.suggest_int(f"mp_kernel_size_{i}", 3, 5)
+            kernel_size = trial.suggest_int(f"conv_kernel_size_{i}", 3, 5)
 
             # add layers
             layers.append(nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size))
             layers.append(nn.ReLU())
 
-            add_maxpool = trial.suggest_categorical(f"add_maxpool_{i}", [True, False])
+            add_maxpool = trial.suggest_categorical(f"add_maxpool_{i}", [True, True, False]) # 66% T - 33% F
             if add_maxpool and not (i==(n_clayers-1)): 
                 layers.append(nn.MaxPool2d(kernel_size=kernel_size_mp, stride=3))
             # always pool the last layer
